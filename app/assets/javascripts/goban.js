@@ -1,3 +1,4 @@
+
 var StoneType = {
   NONE: 0,
   BLACK: 1,
@@ -1603,7 +1604,7 @@ var TreeDrawer = function(player, treeCanvas, ctx) {
     }
   }
 
-  this.draw = function(dontReset = false) {
+  this.draw = function(dontReset) {
     ctx.fillStyle = 'wheat';
     ctx.fillRect(0, 0, 600, 600);
 
@@ -1801,4 +1802,3 @@ if (typeof(module) != "undefined") {
    SgfWriter: SgfWriter,
   }
 }
-

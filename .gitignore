@@ -16,3 +16,5 @@
 /tmp
 
 *.swp
+public/assets/*
+!public/assets/manifest.yml
