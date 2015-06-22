@@ -80,6 +80,7 @@ test:
 #
 production:
   <<: *default
-  database: go-app_production
-  username: go-app
-  password: <%= ENV['GO-APP_DATABASE_PASSWORD'] %>
+  database: da6cdplvfii6c
+  username: faniyivuxtcsdy
+  password: AxPNA4DDbhLoj2lihBLyp2ha28
+  host: ec2-54-243-132-114.compute-1.amazonaws.com
