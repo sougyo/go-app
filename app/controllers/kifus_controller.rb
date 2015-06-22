@@ -1,3 +1,5 @@
+require 'kconv'
+
 class KifusController < ApplicationController
   before_action :set_kifu, only: [:show, :edit, :update, :destroy]
 
@@ -24,8 +26,17 @@ class KifusController < ApplicationController
   # POST /kifus
   # POST /kifus.json
   def create
-    @kifu = Kifu.new(kifu_params)
+    sgfdata = params[:sgffile] ? params[:sgffile].read :
+                CGI.unescapeHTML(params[:sgfdata])
 
+    code_name = {
+        Kconv::EUC  => Encoding::EUC_JP,
+        Kconv::SJIS => Encoding::Shift_JIS,
+        Kconv::UTF8 => Encoding::UTF_8
+    }
+    sgfdata.encode!("UTF-8", code_name[Kconv.guess(sgfdata)], invalid: :replace, undef: :replace, replace: "?")
+
+    @kifu = Kifu.new(sgfdata: sgfdata)
     respond_to do |format|
       if @kifu.save
         format.html { redirect_to @kifu, notice: 'Kifu was successfully created.' }

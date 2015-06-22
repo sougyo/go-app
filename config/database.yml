@@ -22,8 +22,9 @@ default: &default
   pool: 5
 
 development:
-  <<: *default
-  database: go-app_development
+  adapter: sqlite3
+  timeout: 5000
+  database: db/development.sqlite3
 
   # The specified database role being used to connect to postgres.
   # To create additional roles in postgres see `$ createuser --help`.

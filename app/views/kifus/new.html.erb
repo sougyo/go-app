@@ -1,5 +1,82 @@
+<style>
+th {
+  text-align: left;
+}
+</style>
+
+<script>
+function submit_action() {
+  var size = Number($("#goban_size").val());
+  var tree = IgoTreeFactory.create(size);
+  
+  var date = $("#info_infodate_1i").val() + "-" +
+             ("0" + $("#info_infodate_2i").val()).slice(-2) + "-" +
+             ("0" + $("#info_infodate_3i").val()).slice(-2);
+
+  var propUtil = new PropUtil(tree);
+
+  propUtil.getRootPropNode().setProperties({
+    DT: date,
+    SZ: size,
+    PB: $("#black_player").val(),
+    BR: $("#black_rank").val(),
+    PW: $("#white_player").val(),
+    WR: $("#white_rank").val(),
+  }, false);
+
+  var writer = new SgfWriter();
+  var sgfdata = writer.writeSgf(tree);
+  $("#sgfdata").val(sgfdata);
+}
+
+</script>
+
 <h1>New kifu</h1>
 
-<%= render 'form' %>
+<%= form_tag kifus_path, {method: "post", onsubmit: "return submit_action();"} do %>
+
+<table>
+
+<tr>
+<th>Size</th>
+<td><%= number_field_tag :goban_size, 19, min: 3, max: 50, size: 4, style: "width: 40px;" %></td>
+</tr>
+
+<tr>
+<th>Date</th>
+<td><%= date_select :info, :infodate %></td>
+</tr>
+
+<tr>
+<th>Black Player</th>
+<td><%= text_field_tag :black_player %></td>
+</tr>
+
+<tr>
+<th>Rank(Black)</th>
+<td><%= text_field_tag :black_rank %></td>
+</tr>
+
+<tr>
+<th>White Player</th>
+<td><%= text_field_tag :white_player%></td>
+</tr>
+
+<tr>
+<th>Rank(White)</th>
+<td><%= text_field_tag :white_rank %></td>
+</tr>
+
+<tr>
+<th>Handicap</th>
+<td><%= text_field_tag :info_handicap %></td>
+</tr>
+
+</table>
+
+<%= hidden_field_tag :sgfdata %>
+<%= submit_tag "Create" %>
+<% end %>
 
 <%= link_to 'Back', kifus_path %>
+
