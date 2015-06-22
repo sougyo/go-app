@@ -1,0 +1,25 @@
+<%= form_for(@kifu) do |f| %>
+  <% if @kifu.errors.any? %>
+    <div id="error_explanation">
+      <h2><%= pluralize(@kifu.errors.count, "error") %> prohibited this kifu from being saved:</h2>
+
+      <ul>
+      <% @kifu.errors.full_messages.each do |message| %>
+        <li><%= message %></li>
+      <% end %>
+      </ul>
+    </div>
+  <% end %>
+
+  <div class="field">
+    <%= f.label :title %><br>
+    <%= f.text_field :title %>
+  </div>
+  <div class="field">
+    <%= f.label :sgfdata %><br>
+    <%= f.text_area :sgfdata %>
+  </div>
+  <div class="actions">
+    <%= f.submit %>
+  </div>
+<% end %>

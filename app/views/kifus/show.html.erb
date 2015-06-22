@@ -1,0 +1,14 @@
+<p id="notice"><%= notice %></p>
+
+<p>
+  <strong>Title:</strong>
+  <%= @kifu.title %>
+</p>
+
+<p>
+  <strong>Sgfdata:</strong>
+  <%= @kifu.sgfdata %>
+</p>
+
+<%= link_to 'Edit', edit_kifu_path(@kifu) %> |
+<%= link_to 'Back', kifus_path %>

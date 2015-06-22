@@ -1,0 +1,27 @@
+<h1>Listing kifus</h1>
+
+<table>
+  <thead>
+    <tr>
+      <th>Title</th>
+      <th>Sgfdata</th>
+      <th colspan="3"></th>
+    </tr>
+  </thead>
+
+  <tbody>
+    <% @kifus.each do |kifu| %>
+      <tr>
+        <td><%= kifu.title %></td>
+        <td><%= kifu.sgfdata %></td>
+        <td><%= link_to 'Show', kifu %></td>
+        <td><%= link_to 'Edit', edit_kifu_path(kifu) %></td>
+        <td><%= link_to 'Destroy', kifu, method: :delete, data: { confirm: 'Are you sure?' } %></td>
+      </tr>
+    <% end %>
+  </tbody>
+</table>
+
+<br>
+
+<%= link_to 'New Kifu', new_kifu_path %>
