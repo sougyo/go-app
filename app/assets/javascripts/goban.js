@@ -1,4 +1,3 @@
-
 var StoneType = {
   NONE: 0,
   BLACK: 1,
@@ -452,65 +451,69 @@ var SgfPropParser = function() {
 }();
 
 var SgfReader = function() {
-  this.Eof            = 0;
-  this.LeftParenthes  = 1;
-  this.RightParenthes = 2;
-  this.Semicolon      = 3;
-  this.UcWord         = 4;
-  this.BracketBlock   = 5;
+  var Eof            = 0;
+  var LeftParenthes  = 1;
+  var RightParenthes = 2;
+  var Semicolon      = 3;
+  var UcWord         = 4;
+  var BracketBlock   = 5;
 
-  this.Token = function(type, data) {
-    this.type = type;
-    this.data = data;
-  }
+  var rest;
+  var pos;
+  var cache;
 
   this.readSgf = function(str) {
-    this.rest = str.replace(/\s+$/, "");
-    this.pos  = 0;
+    rest = str.replace(/\s+$/, "");
+    pos  = 0;
 
     var tree = new SgfTree();
-    this.readCollection(tree.root);
+    readCollection(tree.root);
     tree.resetIndexes();
     return tree;
   }
 
-  this.readCollection = function(parentNode) {
-    while (this.readGameTree(parentNode));
+  var Token = function(type, data) {
+    this.type = type;
+    this.data = data;
   }
 
-  this.readGameTree = function(parentNode) {
-    if (!this.readTokenByType(this.LeftParenthes))
+  function readCollection(parentNode) {
+    while (readGameTree(parentNode));
+  }
+
+  function readGameTree(parentNode) {
+    if (!readTokenByType(LeftParenthes))
       return;
 
-    var nodes = this.readNodeSequence(parentNode);
+    var nodes = readNodeSequence(parentNode);
     if (nodes.length == 0)
-      this.parseError();
+      parseError();
 
-    this.readCollection(nodes[nodes.length - 1]);
+    readCollection(nodes[nodes.length - 1]);
 
-    this.consumeToken(this.RightParenthes);
+    consumeToken(RightParenthes);
     return true;
   }
 
-  this.readNodeSequence = function(parentNode) {
+  function readNodeSequence(parentNode) {
     var nodes = []
     var node = parentNode;
-    while(node = this.readNode(node))
+    while(node = readNode(node))
       nodes.push(node);
     return nodes;
   }
 
-  this.readNode = function(parentNode) {
-    if (!this.readTokenByType(this.Semicolon))
+  function readNode(parentNode) {
+    if (!readTokenByType(Semicolon))
       return;
 
     var node = new SgfNode(parentNode);
 
     var ident;
-    while (ident_token = this.readTokenByType(this.UcWord)) {
+    while (ident_token = readTokenByType(UcWord)) {
       var ident = ident_token.data;
       var blocks = [];
-      while(block_token = this.readTokenByType(this.BracketBlock))
+      while(block_token = readTokenByType(BracketBlock))
         blocks.push(block_token.data);
       
       var parser = SgfPropParser[ident];
@@ -526,111 +529,87 @@ var SgfReader = function() {
     return node;
   }
 
-  this.readTokenByType = function(type) {
-    token = this.nextToken();
+  function readTokenByType(type) {
+    var token = nextToken();
 
     if (token.type == type)
       return token;
 
-    if (token.type != this.Eof)
-      this.cacheToken(token);
+    if (token.type != Eof)
+      cacheToken(token);
   }
 
-  this.consumeToken = function(type) {
-    var token = this.nextToken();
+  function consumeToken(type) {
+    var token = nextToken();
     if (token.type != type)
-      throw new Error("Parse Error: Expected:" + type + " Actual:" + token.type + " at:" + this.pos);
+      throw new Error("Parse Error: Expected:" + type + " Actual:" + token.type + " at:" + pos);
   }
 
-  this.cache = null;
-  this.cacheToken = function(token) {
-    this.cache = token;
+  function cacheToken(token) {
+    if (cache)
+      throw new Error("Parse Error: unexpected cache");
+    cache = token;
   }
 
-  this.nextToken = function() {
-    if (this.cache) {
-      var ret = this.cache;
-      this.cache = null;
+  function nextToken() {
+    if (cache) {
+      var ret = cache;
+      cache = null;
       return ret;
     }
 
-    this.skipSpace();
+    skipSpace();
     
-    if (!this.rest[0])
-      return new this.Token(this.Eof, true);
+    if (!rest[0])
+      return new Token(Eof, true);
 
-    switch (this.rest[0]) {
+    switch (rest[0]) {
       case '(':
-        this.nextPos(1);
-        return new this.Token(this.LeftParenthes, true);
+        nextPos(1);
+        return new Token(LeftParenthes, true);
       case ')':
-        this.nextPos(1);
-        return new this.Token(this.RightParenthes, true);
+        nextPos(1);
+        return new Token(RightParenthes, true);
       case ';':
-        this.nextPos(1);
-        return new this.Token(this.Semicolon, true);
+        nextPos(1);
+        return new Token(Semicolon, true);
       case '[':
         var p = 0;
         do {
-          p = this.rest.indexOf("]", p + 1);
+          p = rest.indexOf("]", p + 1);
           if (p == -1)
-            this.parseError();
-        } while (this.rest[p - 1] == '\\');
-        var block = this.nextPos(p + 1).slice(1, -1);
-        return new this.Token(this.BracketBlock, block);
+            parseError();
+        } while (rest[p - 1] == '\\');
+        var block = nextPos(p + 1).slice(1, -1);
+        return new Token(BracketBlock, block);
       default:
-        var tmp = this.rest.match(/[^A-Z]/);
+        var tmp = rest.match(/[^A-Z]/);
         if (!tmp || tmp.index == 0)
-          this.parseError();
+          parseError();
 
-        var ident = this.nextPos(tmp.index);
-        return new this.Token(this.UcWord, ident);
+        var ident = nextPos(tmp.index);
+        return new Token(UcWord, ident);
     }
   }
 
-  this.skipSpace = function() {
-    result = this.rest.match(/[^\s]/);
+  function skipSpace() {
+    result = rest.match(/[^\s]/);
     if (result)
-      this.nextPos(result.index);
+      nextPos(result.index);
   }
 
-  this.nextPos = function(n) {
+  function nextPos(n) {
     if (!n)
       return ""
 
-    var ret = this.rest.substr(0, n);
-    this.rest = this.rest.substr(n);
-    this.pos += n;
+    var ret = rest.substr(0, n);
+    rest = rest.substr(n);
+    pos += n;
     return ret;
   }
 
-  this.parseError = function() {
-    throw new Error("Parse Error at:" + this.pos + " rest: '" + this.rest.substr(0, 10) + "'");
-  }
-}
-
-var SgfWriter = function() {
-  this.writeSgf = function(tree) {
-    this.result = "";
-    this.writeHelepr(tree.root, true);
-    return this.result;
-  }
-
-  this.writeHelepr = function(node, force) {
-    var children = node.children;
-    var flag = force || (children.length == 1 ? false : true);
-
-    for (var i = 0; i < children.length; i++) {
-      if (flag) this.append("(");
-      var child = children[i];
-      this.append(child);
-      this.writeHelepr(child);
-      if (flag) this.append(")");
-    }
-  }
-
-  this.append = function(str) {
-    this.result += str;
+  function parseError() {
+    throw new Error("Parse Error at:" + pos + " rest: '" + rest.substr(0, 10) + "'");
   }
 }
 
@@ -715,7 +694,7 @@ var SgfNode = function(parentNode) {
     this.children[this.childIndex] = child;
   }
 
-  var propValue2str = function(propValue) {
+  function propValue2str(propValue) {
     if (!propValue)
       return "[]";
 
@@ -824,18 +803,36 @@ var SgfTree = function() {
 
   this.resetIndexes = function() {
     this.current = this.root;
-    this.resetIndexesHelper(this.root);
+    resetIndexesHelper(this.root);
   }
 
-  this.resetIndexesHelper = function(node) {
+  function resetIndexesHelper(node) {
     node.setChildIndex(0);
     var children = node.children;
     for (var i = 0; i < children.length; i++) {
       var child = children[i];
       if (child.parentNode != node)
         throw new Error("detect invalid link");
-      this.resetIndexesHelper(child);
+      resetIndexesHelper(child);
     }
+  }
+
+  this.toSgf = function() {
+    result = "";
+    var writeHelepr = function(node, force) {
+      var children = node.children;
+      var flag = force || (children.length == 1 ? false : true);
+
+      for (var i = 0; i < children.length; i++) {
+        if (flag) result += "(";
+        var child = children[i];
+        result += child;
+        writeHelepr(child, false);
+        if (flag) result += ")";
+      }
+    }
+    writeHelepr(this.root, true);
+    return result;
   }
 }
 
@@ -863,10 +860,10 @@ var PropUtil = function(tree) {
     "AE": StoneType.NONE 
   };
 
-  function val2ident(dict, val) {
-    for (ident in dict)
-      if (dict[ident] == val)
-        return ident;
+  function findKey(hash, val) {
+    for (key in hash)
+      if (hash[key] == val)
+        return key;
   }
 
   function existsIn(dict, node) {
@@ -902,7 +899,7 @@ var PropUtil = function(tree) {
   }
 
   this.addMoveProperty = function(x, y, stone) {
-    var stoneIdent = val2ident(movePropDict, stone);
+    var stoneIdent = findKey(movePropDict, stone);
     if (!stoneIdent)
       return;
 
@@ -936,7 +933,7 @@ var PropUtil = function(tree) {
     if (this.tree.current.hasChild())
       return false;
 
-    var stoneIdent = val2ident(setupPropDict, stone);
+    var stoneIdent = findKey(setupPropDict, stone);
     if (!stoneIdent)
       return false;
 
@@ -1792,13 +1789,13 @@ var createDrawer = function(player, id1, id2, opt) {
 
 if (typeof(module) != "undefined") {
   module.exports = {
-   SgfTree:   SgfTree,
    Move:      Move,
    StoneType: StoneType,
    SgfNode:   SgfNode,
+   SgfTree:   SgfTree,
    IgoPlayer: IgoPlayer,
    IgoPoint:  IgoPoint,
    SgfReader: SgfReader,
-   SgfWriter: SgfWriter,
   }
 }
+

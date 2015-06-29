@@ -98,8 +98,7 @@
   }
 
   function submit_action() {
-    var writer = new SgfWriter();
-    var sgfdata = writer.writeSgf(player.sgfTree);
+    var sgfdata = player.sgfTree.toSgf();
     $("#sgfdata_field").val(sgfdata);
   }
 </script>
@@ -139,10 +138,11 @@
     </div>
   <% end %>
 
+  <%= hidden_field_tag :ktok, @kifu.key %>
   <%= f.hidden_field :sgfdata, id: "sgfdata_field"  %>
   <div class="actions">
     <%= f.submit %>
   </div>
 <% end %>
 
-<%= link_to 'Back', kifus_path %>
+<%= link_to 'Back', sec_room_path(@kifu.room) %>

@@ -1,4 +1,8 @@
 Rails.application.routes.draw do
+  get  "kifus/new/:rid" => "kifus#new"
+
+  resources :rooms
+
   resources :kifus
 
   # The priority is based upon order of creation: first created -> highest priority.

@@ -1,0 +1,45 @@
+<p id="notice"><%= notice %></p>
+
+このURLをただちにブックマークしてください。
+
+<p>
+  <strong>Name:</strong>
+  <%= @room.name %>
+</p>
+
+<h1>Listing kifus</h1>
+
+<%= form_tag({action: :create, method: "post" }, {multipart: true}) do %>
+
+<%= file_field_tag 'sgffile' %>
+<%= submit_tag "Upload" %>
+<% end %>
+
+<table>
+  <thead>
+    <tr>
+      <th></th>
+      <th colspan="2"></th>
+    </tr>
+  </thead>
+
+  <tbody>
+    <% @room.kifus.each do |kifu| %>
+      <% kifu.sgfdata =~ /DT\[.*(\d\d\d\d-\d\d-\d\d|\d\d\d\d\/\d\d\/\d\d).*\]/; dt = $1.to_s %>
+      <% kifu.sgfdata =~ /PB\[([^\]]*)\]/; pb = $1.to_s %>
+      <% kifu.sgfdata =~ /PW\[([^\]]*)\]/; pw = $1.to_s %>
+      <tr>
+        <td><%= "#{dt} [#{pb}] vs [#{pw}]" %></td>
+        <td><%= link_to 'Show', sec_kifu_path(kifu) %></td>
+        <td><%= link_to 'Destroy', sec_kifu_path(kifu), method: :delete, data: { confirm: 'Are you sure?' } %></td>
+      </tr>
+    <% end %>
+  </tbody>
+</table>
+
+<br>
+
+<%= link_to 'New Kifu', sec_new_kifu_path(@room) %>
+
+<%= link_to 'Edit', edit_room_path(@room) %> |
+<%= link_to 'Index', rooms_path %>

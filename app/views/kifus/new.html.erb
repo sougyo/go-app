@@ -19,13 +19,10 @@ function submit_action() {
     DT: date,
     SZ: size,
     PB: $("#black_player").val(),
-    BR: $("#black_rank").val(),
     PW: $("#white_player").val(),
-    WR: $("#white_rank").val(),
   }, false);
 
-  var writer = new SgfWriter();
-  var sgfdata = writer.writeSgf(tree);
+  var sgfdata = tree.toSgf();
   $("#sgfdata").val(sgfdata);
 }
 
@@ -34,6 +31,8 @@ function submit_action() {
 <h1>New kifu</h1>
 
 <%= form_tag kifus_path, {method: "post", onsubmit: "return submit_action();"} do %>
+
+kifu title: <%= text_field_tag :title %>
 
 <table>
 
@@ -53,18 +52,8 @@ function submit_action() {
 </tr>
 
 <tr>
-<th>Rank(Black)</th>
-<td><%= text_field_tag :black_rank %></td>
-</tr>
-
-<tr>
 <th>White Player</th>
 <td><%= text_field_tag :white_player%></td>
-</tr>
-
-<tr>
-<th>Rank(White)</th>
-<td><%= text_field_tag :white_rank %></td>
 </tr>
 
 <tr>
@@ -75,8 +64,10 @@ function submit_action() {
 </table>
 
 <%= hidden_field_tag :sgfdata %>
+<%= hidden_field_tag :rid,  @room.id %>
+<%= hidden_field_tag :rtok, @room.key%>
 <%= submit_tag "Create" %>
 <% end %>
 
-<%= link_to 'Back', kifus_path %>
+<%= link_to 'Back', sec_room_path(@room) %>
 

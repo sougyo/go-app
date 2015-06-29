@@ -11,11 +11,20 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20150622033828) do
+ActiveRecord::Schema.define(version: 20150624205404) do
 
   create_table "kifus", force: true do |t|
     t.string   "title"
     t.text     "sgfdata"
+    t.datetime "created_at"
+    t.datetime "updated_at"
+    t.integer  "room_id"
+    t.string   "key"
+  end
+
+  create_table "rooms", force: true do |t|
+    t.string   "name"
+    t.string   "key"
     t.datetime "created_at"
     t.datetime "updated_at"
   end
