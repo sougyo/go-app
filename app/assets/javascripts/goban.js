@@ -1682,7 +1682,7 @@ var TreeDrawer = function(player, treeCanvas, ctx) {
   });
 
   var varThis = this;
-  treeCanvas.addEventListener("mousemove", function(e) {
+  treeCanvas.addEventListener("touchmove", function(e) {
     var rect = e.target.getBoundingClientRect();
     var x = e.clientX - rect.left;
     var y = e.clientY - rect.top;
