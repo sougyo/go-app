@@ -46,7 +46,7 @@ class RoomsController < ApplicationController
   def update
     respond_to do |format|
       if @room.update(room_params)
-        format.html { redirect_to @room, notice: 'Room was successfully updated.' }
+        format.html { redirect_to view_context.sec_room_path(@room), notice: 'Room was successfully updated.' }
         format.json { render :show, status: :ok, location: @room }
       else
         format.html { render :edit }
@@ -78,6 +78,6 @@ class RoomsController < ApplicationController
 
     def auth
       key = params[:rtok]
-      raise "Access Denied" unless @room.key.length == key.length && @room.key == key
+      raise "Access Denied" unless key && @room.key.length == key.length && @room.key == key
     end
 end

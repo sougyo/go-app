@@ -1615,10 +1615,14 @@ var TreeDrawer = function(player, treeCanvas, ctx) {
       for (var j = 0; j < matrix[i].length; j++) {
         var node = matrix[i][j];
         if (node && matrix[i+1]) {
+          var prevK = j;
           for (var k = j; k < matrix[i+1].length && (matrix[i][k] === node || !matrix[i][k]); k++) {
             if (matrix[i+1][k]) {
               lines.push([toX(i), toY(k), toX(i + 1), toY(k)]);
-              lines.push([toX(i), toY(j), toX(i), toY(k)]);
+              if (prevK != k) {
+                lines.push([toX(i), toY(prevK), toX(i), toY(k)]);
+                prevK = k;
+              }
             }
           }
         }
@@ -1682,7 +1686,7 @@ var TreeDrawer = function(player, treeCanvas, ctx) {
   });
 
   var varThis = this;
-  treeCanvas.addEventListener("touchmove", function(e) {
+  treeCanvas.addEventListener("mousemove", function(e) {
     var rect = e.target.getBoundingClientRect();
     var x = e.clientX - rect.left;
     var y = e.clientY - rect.top;

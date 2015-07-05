@@ -1,35 +1,29 @@
-<p id="notice"><%= notice %></p>
+<h1><%= @room.name %></h1>
+<%= link_to 'Edit', edit_room_path(@room) %>
 
-このURLをただちにブックマークしてください。
-
-<p>
-  <strong>Name:</strong>
-  <%= @room.name %>
-</p>
-
-<h1>Listing kifus</h1>
-
-<%= form_tag({action: :create, method: "post" }, {multipart: true}) do %>
-
-<%= file_field_tag 'sgffile' %>
-<%= submit_tag "Upload" %>
-<% end %>
-
+<br />
+<br />
 <table>
   <thead>
     <tr>
-      <th></th>
+      <th>棋譜名</th>
+      <th>対局日</th>
+      <th>黒番</th>
+      <th>白番</th>
       <th colspan="2"></th>
     </tr>
   </thead>
 
   <tbody>
     <% @room.kifus.each do |kifu| %>
-      <% kifu.sgfdata =~ /DT\[.*(\d\d\d\d-\d\d-\d\d|\d\d\d\d\/\d\d\/\d\d).*\]/; dt = $1.to_s %>
+      <% kifu.sgfdata =~ /DT\[.*(\d\d\d\d)[-\/](\d\d)[-\/](\d\d).*\]/; dt = ($1 && $2 && $3) ? "#{$1}/#{$2}/#{$3}" : "" %>
       <% kifu.sgfdata =~ /PB\[([^\]]*)\]/; pb = $1.to_s %>
       <% kifu.sgfdata =~ /PW\[([^\]]*)\]/; pw = $1.to_s %>
       <tr>
-        <td><%= "#{dt} [#{pb}] vs [#{pw}]" %></td>
+        <td><%= kifu.title %></td>
+        <td><%= dt %></td>
+        <td><%= pb %></td>
+        <td><%= pw %></td>
         <td><%= link_to 'Show', sec_kifu_path(kifu) %></td>
         <td><%= link_to 'Destroy', sec_kifu_path(kifu), method: :delete, data: { confirm: 'Are you sure?' } %></td>
       </tr>
@@ -41,5 +35,12 @@
 
 <%= link_to 'New Kifu', sec_new_kifu_path(@room) %>
 
-<%= link_to 'Edit', edit_room_path(@room) %> |
-<%= link_to 'Index', rooms_path %>
+<br />
+<%= form_tag({controller: :kifus, action: :create, method: "post" }, {multipart: true}) do %>
+Sgf file Update:
+<%= file_field_tag 'sgffile' %>
+<%= hidden_field_tag :rid,  @room.id  %>
+<%= hidden_field_tag :rtok, @room.key %>
+<%= submit_tag "Upload" %>
+<% end %>
+

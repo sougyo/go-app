@@ -5,6 +5,42 @@
     width: 30px;
     height: 30px;
   }
+  div#main_area {
+    margin-top: 30px;
+    margin-left: 30px;
+    padding: 0px;
+  }
+  div#body_area{
+    width: 800px;
+    height: 500px;
+  }
+  div#goban_area {
+    width: 500px;
+    height: 500px;
+    float: left;
+  }
+  div#subpanel_area {
+    width: 300px;
+    height: 500px;
+    float: right;
+  }
+  div#info_area {
+    width: 290px;
+    height: 190px;
+    text-align: left;
+    padding-top: 10px;
+    padding-left: 10px;
+  }
+  div#tree_area {
+    width: 300px;
+    height: 300px;
+  }
+  div#button_area {
+    width: 800px;
+    margin-top: 20px;
+    margin-bottom: 20px;
+    float: clear;
+  }
 </style>
 
 <script>
@@ -41,6 +77,11 @@
 */
 
     player.updateGoban();
+
+    $('#black_player').val(player.propUtil.getRootPropNode().getProperty("PB"));
+    $('#white_player').val(player.propUtil.getRootPropNode().getProperty("PW"));
+    $('#black_rank').val(player.propUtil.getRootPropNode().getProperty("BR"));
+    $('#white_rank').val(player.propUtil.getRootPropNode().getProperty("WR"));
   });
 
   function forward_button() {
@@ -98,50 +139,108 @@
   }
 
   function submit_action() {
-    var sgfdata = player.sgfTree.toSgf();
-    $("#sgfdata_field").val(sgfdata);
+    if (!player)
+      return;
+
+    player.propUtil.getRootPropNode().setProperties({
+      PB: $("#black_player").val(),
+      PW: $("#white_player").val(),
+      BR: $("#black_rank").val(),
+      WR: $("#white_rank").val(),
+    }, false);
+
+    $("#sgfdata_field").val(player.sgfTree.toSgf());
   }
 </script>
 
-<canvas id="goban_canvas" width=600px height=600px></canvas>
-<canvas id="tree_canvas" width=300px height=450px></canvas>
-<div align="center">
-  <div align="center">
-    <img src="/images/btn_begin.png"    class="button" onclick="begin_button();" />
-    <img src="/images/btn_bback.png"    class="button" onclick="bback_button();" />
-    <img src="/images/btn_back.png"     class="button" onclick="back_button();" />
-    <img src="/images/btn_forward.png"  class="button" onclick="forward_button();" />
-    <img src="/images/btn_fforward.png" class="button" onclick="fforward_button();" />
-    <img src="/images/btn_end.png"      class="button" onclick="end_button();" />
-    <img src="/images/btn_pass.png"     class="button" onclick="pass_button();" />
-    <img src="/images/btn_cut.png"      class="button" onclick="cut_button();" />
-    <img src="/images/number.png"       class="button" onclick="number_button();" />
-    <img src="/images/change.png"       class="button" onclick="move_button();" />
-    <img src="/images/ab.png"           class="button" onclick="black_button();" />
-    <img src="/images/aw.png"           class="button" onclick="white_button();" />
-    <img src="/images/ae.png"           class="button" onclick="erase_button();" />
-  </div>
+<h1><%= @kifu.title %></h1>
+
+<div id=main_area>
+<div id=body_area>
+<div id=goban_area>
+  <canvas id="goban_canvas" width=500px height=500px></canvas>
+</div>
+<div id=subpanel_area>
+<div id=info_area>
+    <table>
+    <tr>
+    <th>Date</th>
+    <td><%= date_select :info, :infodate %></td>
+    </tr>
+
+    <tr>
+    <th>黒番</th>
+    <td><%= text_field_tag :black_player %></td>
+    </tr>
+
+    <tr>
+    <th>白番</th>
+    <td><%= text_field_tag :white_player %></td>
+    </tr>
+
+    <tr>
+    <th>棋力(黒)</th>
+    <td><%= text_field_tag :black_rank %></td>
+    </tr>
+
+    <tr>
+    <th>棋力(白)</th>
+    <td><%= text_field_tag :white_rank %></td>
+    </tr>
+
+    <tr>
+    <th>コミ</th>
+    <td><%= text_field_tag :handicap%></td>
+    </tr>
+
+    <tr>
+    <th>対局結果</th>
+    <td><%= text_field_tag :result%></td>
+    </tr>
+    </table>
+</div>
+<div id=tree_area>
+    <canvas id="tree_canvas" width=300px height=300px></canvas>
+</div>
+</div>
+</div>
+<div id=button_area>
+    <div align="center">
+        <img src="/images/btn_begin.png"    class="button" onclick="begin_button();" />
+        <img src="/images/btn_bback.png"    class="button" onclick="bback_button();" />
+        <img src="/images/btn_back.png"     class="button" onclick="back_button();" />
+        <img src="/images/btn_forward.png"  class="button" onclick="forward_button();" />
+        <img src="/images/btn_fforward.png" class="button" onclick="fforward_button();" />
+        <img src="/images/btn_end.png"      class="button" onclick="end_button();" />
+        <img src="/images/btn_pass.png"     class="button" onclick="pass_button();" />
+        <img src="/images/btn_cut.png"      class="button" onclick="cut_button();" />
+        <img src="/images/number.png"       class="button" onclick="number_button();" />
+        <img src="/images/change.png"       class="button" onclick="move_button();" />
+        <img src="/images/ab.png"           class="button" onclick="black_button();" />
+        <img src="/images/aw.png"           class="button" onclick="white_button();" />
+        <img src="/images/ae.png"           class="button" onclick="erase_button();" />
+    </div>
+</div>
 </div>
 
+  <%= form_for(@kifu, html: {onsubmit: "return submit_action();"}) do |f| %>
+    <% if @kifu.errors.any? %>
+      <div id="error_explanation">
+        <h2><%= pluralize(@kifu.errors.count, "error") %> prohibited this kifu from being saved:</h2>
 
-<%= form_for(@kifu, html: {onsubmit: "return submit_action();"}) do |f| %>
-  <% if @kifu.errors.any? %>
-    <div id="error_explanation">
-      <h2><%= pluralize(@kifu.errors.count, "error") %> prohibited this kifu from being saved:</h2>
+        <ul>
+        <% @kifu.errors.full_messages.each do |message| %>
+          <li><%= message %></li>
+        <% end %>
+        </ul>
+      </div>
+    <% end %>
 
-      <ul>
-      <% @kifu.errors.full_messages.each do |message| %>
-        <li><%= message %></li>
-      <% end %>
-      </ul>
+    <%= hidden_field_tag :ktok, @kifu.key %>
+    <%= f.hidden_field :sgfdata, id: "sgfdata_field"  %>
+    <div class="actions">
+      <%= f.submit %>
     </div>
   <% end %>
-
-  <%= hidden_field_tag :ktok, @kifu.key %>
-  <%= f.hidden_field :sgfdata, id: "sgfdata_field"  %>
-  <div class="actions">
-    <%= f.submit %>
-  </div>
-<% end %>
 
 <%= link_to 'Back', sec_room_path(@kifu.room) %>

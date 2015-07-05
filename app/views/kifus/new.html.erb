@@ -32,33 +32,21 @@ function submit_action() {
 
 <%= form_tag kifus_path, {method: "post", onsubmit: "return submit_action();"} do %>
 
-kifu title: <%= text_field_tag :title %>
-
 <table>
 
 <tr>
-<th>Size</th>
+<th>棋譜名</th>
+<td><%= text_field_tag :title %></td>
+</tr>
+
+<tr>
+<th>サイズ</th>
 <td><%= number_field_tag :goban_size, 19, min: 3, max: 50, size: 4, style: "width: 40px;" %></td>
 </tr>
 
 <tr>
-<th>Date</th>
+<th>対局日</th>
 <td><%= date_select :info, :infodate %></td>
-</tr>
-
-<tr>
-<th>Black Player</th>
-<td><%= text_field_tag :black_player %></td>
-</tr>
-
-<tr>
-<th>White Player</th>
-<td><%= text_field_tag :white_player%></td>
-</tr>
-
-<tr>
-<th>Handicap</th>
-<td><%= text_field_tag :info_handicap %></td>
 </tr>
 
 </table>
