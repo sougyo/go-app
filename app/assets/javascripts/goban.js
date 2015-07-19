@@ -1741,24 +1741,23 @@ var TreeDrawer = function(player, treeCanvas, ctx) {
   treeCanvas.addEventListener("touchstart", function(e) {
     e.preventDefault(e);
     handleDownEvent(windowToCanvas(e));
-   // alert("touchstart");
+    alert("touchstart: " + saveX + " " + saveY + " " + transX + " " + transY);
   });
 
   treeCanvas.addEventListener("touchmove", function(e) {
     e.preventDefault(e);
     handleMoveEvent(windowToCanvas(e));
-    //alert("touchmove");
+    alert("touchmove: " + saveX + " " + saveY + " " + transX + " " + transY);
   });
 
   treeCanvas.addEventListener("touchend", function(e) {
     e.preventDefault(e);
     handleUpEvent(windowToCanvas(e));
-    alert("touchend");
+    alert("touchend: " + saveX + " " + saveY + " " + transX + " " + transY);
   });
 
   treeCanvas.addEventListener("touchcancel", function(e) {
     e.preventDefault(e);
-    alert("touchcancel");
   });
 
   treeCanvas.addEventListener("mousedown", function(e) {
