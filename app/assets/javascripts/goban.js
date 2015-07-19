@@ -1723,9 +1723,7 @@ var TreeDrawer = function(player, treeCanvas, ctx) {
     varThis.draw(true);
   }
 
-  function windowToCanvas(e) {
-    var x = e.clientX;
-    var y = e.clientY;
+  function windowToCanvas(x, y) {
     var bbox = treeCanvas.getBoundingClientRect();
     return { x: (x - bbox.left) * (treeCanvas.width / bbox.width),
              y: (y - bbox.top)  * (treeCanvas.height / bbox.height)
@@ -1740,38 +1738,32 @@ var TreeDrawer = function(player, treeCanvas, ctx) {
 
   treeCanvas.addEventListener("touchstart", function(e) {
     e.preventDefault(e);
-    handleDownEvent(windowToCanvas(e));
+    handleDownEvent(windowToCanvas(e.pageX, e.pageY));
   });
 
   treeCanvas.addEventListener("touchmove", function(e) {
     e.preventDefault(e);
-    handleMoveEvent(windowToCanvas(e));
-    alert("touchmove: " + saveX + " " + saveY + " " + transX + " " + transY);
+    handleMoveEvent(windowToCanvas(e.pageX, e.pageY));
   });
 
   treeCanvas.addEventListener("touchend", function(e) {
     e.preventDefault(e);
-    handleUpEvent(windowToCanvas(e));
-    alert("touchend: " + saveX + " " + saveY + " " + transX + " " + transY);
-  });
-
-  treeCanvas.addEventListener("touchcancel", function(e) {
-    e.preventDefault(e);
+    handleUpEvent(windowToCanvas(e.pageX, e.pageY));
   });
 
   treeCanvas.addEventListener("mousedown", function(e) {
     e.preventDefault(e);
-    handleDownEvent(windowToCanvas(e));
+    handleDownEvent(windowToCanvas(e.clientX, e.clientY));
   });
 
   treeCanvas.addEventListener("mousemove", function(e) {
     e.preventDefault(e);
-    handleMoveEvent(windowToCanvas(e));
+    handleMoveEvent(windowToCanvas(e.clientX, e.clientY));
   });
 
   treeCanvas.addEventListener("mouseup", function(e) {
     e.preventDefault(e);
-    handleUpEvent(windowToCanvas(e));
+    handleUpEvent(windowToCanvas(e.clientX, e.clientY));
   });
 
   this.draw();
