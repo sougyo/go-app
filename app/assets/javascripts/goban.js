@@ -1713,11 +1713,13 @@ var TreeDrawer = function(player, treeCanvas, ctx) {
 
     var i = toI(x);
     var j = toJ(y);
+alert("i " + i + " j " + j);
     var node = null;
     if (varThis.matrix[i])
       node = varThis.matrix[i][j];
     if (node) {
       player.setCurrent(node);
+alert("node found!");
     }
 
     varThis.draw(true);
