@@ -1747,7 +1747,7 @@ var TreeDrawer = function(player, treeCanvas, ctx) {
   treeCanvas.addEventListener("touchmove", function(e) {
     e.preventDefault(e);
     handleMoveEvent(windowToCanvas(e));
-    alert("touchmove");
+    //alert("touchmove");
   });
 
   treeCanvas.addEventListener("touchend", function(e) {
