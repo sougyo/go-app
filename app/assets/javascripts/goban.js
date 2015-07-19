@@ -1554,8 +1554,8 @@ var TreeDrawer = function(player, treeCanvas, ctx) {
 
   function drawLine(x1, y1, x2, y2) {
     ctx.beginPath();
-    ctx.moveTo(x1, y1);
-    ctx.lineTo(x2, y2);
+    ctx.moveTo(x1 + 0.5, y1 + 0.5);
+    ctx.lineTo(x2 + 0.5, y2 + 0.5);
     ctx.stroke();
   }
 
@@ -1713,7 +1713,7 @@ var TreeDrawer = function(player, treeCanvas, ctx) {
 
     var i = toI(x);
     var j = toJ(y);
-alert("i " + i + " j " + j);
+alert("x " + x + " y " + y + " i " + i + " j " + j);
     var node = null;
     if (varThis.matrix[i])
       node = varThis.matrix[i][j];
@@ -1751,7 +1751,6 @@ alert("node found!");
   treeCanvas.addEventListener("touchend", function(e) {
     e.preventDefault(e);
     handleUpEvent(windowToCanvas(e.pageX, e.pageY));
-alert("touchend");
   });
 
   treeCanvas.addEventListener("mousedown", function(e) {
