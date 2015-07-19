@@ -1713,13 +1713,11 @@ var TreeDrawer = function(player, treeCanvas, ctx) {
 
     var i = toI(x);
     var j = toJ(y);
-alert("x " + x + " y " + y + " i " + i + " j " + j);
     var node = null;
     if (varThis.matrix[i])
       node = varThis.matrix[i][j];
     if (node) {
       player.setCurrent(node);
-alert("node found!");
     }
 
     varThis.draw(true);
@@ -1751,6 +1749,16 @@ alert("node found!");
   treeCanvas.addEventListener("touchend", function(e) {
     e.preventDefault(e);
     handleUpEvent(windowToCanvas(e.pageX, e.pageY));
+
+    var bbox = treeCanvas.getBoundingClientRect();
+    alert("pageX: " + e.pageX + " pageY: " + e.pageY + " bbleft: " + bbox.left + " bbtop: " + bbox.top +
+          " bbwidth: " + bbox.width + " bbheight: " + bbox.height + " canWidth: " + treeCanvas.width +
+          " canHeight: " + treeCanvas.height);
+
+    var bbox = treeCanvas.getBoundingClientRect();
+    return { x: (x - bbox.left) * (treeCanvas.width / bbox.width),
+             y: (y - bbox.top)  * (treeCanvas.height / bbox.height)
+           }
   });
 
   treeCanvas.addEventListener("mousedown", function(e) {
