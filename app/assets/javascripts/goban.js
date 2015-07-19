@@ -1605,8 +1605,8 @@ var TreeDrawer = function(player, treeCanvas, ctx) {
 
   this.resetPosition = function() {
     if (saveX == null && saveY == null && this.currentX && this.currentY) {
-      transX = -this.currentX + 50;
-      transY = -this.currentY + 50;
+      transX = -this.currentX + 100;
+      transY = -this.currentY + 100;
     }
   }
 
@@ -1686,16 +1686,16 @@ var TreeDrawer = function(player, treeCanvas, ctx) {
     ctx.restore();
   }
 
-  treeCanvas.addEventListener("mousedown", function(e) {
+  var varThis = this;
+  function handleDownEvent(e) {
     var rect = e.target.getBoundingClientRect();
     var x = e.clientX - rect.left;
     var y = e.clientY - rect.top;
     saveX = x;
     saveY = y;
-  });
+  }
 
-  var varThis = this;
-  treeCanvas.addEventListener("mousemove", function(e) {
+  function handleMoveEvent(e) {
     var rect = e.target.getBoundingClientRect();
     var x = e.clientX - rect.left;
     var y = e.clientY - rect.top;
@@ -1706,9 +1706,9 @@ var TreeDrawer = function(player, treeCanvas, ctx) {
       saveY = y;
     }
     varThis.draw(true);
-  });
+  }
 
-  treeCanvas.addEventListener("mouseup", function(e) {
+  function handleUpEvent(e) {
     saveX = null;
     saveY = null;
     
@@ -1726,12 +1726,42 @@ var TreeDrawer = function(player, treeCanvas, ctx) {
     }
 
     varThis.draw(true);
-  });
+  }
 
   treeCanvas.addEventListener("mouseout", function(e) {
     saveX = null;
     saveY = null;
     varThis.draw(true);
+  });
+
+  treeCanvas.addEventListener("touchstart", function(e) {
+    e.preventDefault(e);
+    handleDownEvent(e);
+  });
+
+  treeCanvas.addEventListener("touchmove", function(e) {
+    e.preventDefault(e);
+    handleMoveEvent(e);
+  });
+
+  treeCanvas.addEventListener("touchend", function(e) {
+    e.preventDefault(e);
+    handleUpEvent(e);
+  });
+
+  treeCanvas.addEventListener("mousedown", function(e) {
+    e.preventDefault(e);
+    handleDownEvent(e);
+  });
+
+  treeCanvas.addEventListener("mousemove", function(e) {
+    e.preventDefault(e);
+    handleMoveEvent(e);
+  });
+
+  treeCanvas.addEventListener("mouseup", function(e) {
+    e.preventDefault(e);
+    handleUpEvent(e);
   });
 
   this.draw();
@@ -1761,6 +1791,7 @@ var createDrawer = function(player, id1, id2, opt) {
   var downPos = {};
 
   gobanCanvas.addEventListener("click", function(e) {
+    e.preventDefault(e);
     var p = env.mouseEventToIJ(e);
     var r = e.target.getBoundingClientRect();
     if (p.i    == downPos.p.i    &&
@@ -1789,6 +1820,7 @@ var createDrawer = function(player, id1, id2, opt) {
   });
 
   gobanCanvas.addEventListener("mousedown", function(e) {
+    e.preventDefault(e);
     downPos.p = env.mouseEventToIJ(e);
     downPos.r = e.target.getBoundingClientRect();
   });
