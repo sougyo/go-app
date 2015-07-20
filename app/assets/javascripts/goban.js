@@ -1067,6 +1067,7 @@ var IgoPlayer = function(igoTree) {
   }
 
   this.updateGoban = function() {
+    var nextStone = this.rule.getNextStone();
     this.rule.clear();
     var nodes = this.sgfTree.toSequence();
     for (var i = 0; i < nodes.length; i++) {
@@ -1084,6 +1085,7 @@ var IgoPlayer = function(igoTree) {
         }
       }
     }
+    this.rule.setNextStone(nextStone);
     this.notify();
   }
 

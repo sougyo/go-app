@@ -4,8 +4,8 @@
 
 <style>
   img.button {
-    width: 50px;
-    height: 50px;
+    width: 70px;
+    height: 70px;
     margin-left: 8px;
     margin-bottom: 10px;
   }
@@ -71,14 +71,13 @@
     var drawer = createDrawer(player, "goban_canvas", "tree_canvas", option);
     drawer.resize(500, 500);
 
-/*
+
+    option.clickType = ClickType.MOVE;
     player.addListener(function() {
-      
-      var writer = new SgfWriter();
-      var sgfdata = writer.writeSgf(player.sgfTree);
-      $("#hogearea").val(sgfdata);
+      apply_stone_button_image();
     });
-*/
+    apply_stone_button_image();
+
 
     player.updateGoban();
 
@@ -130,18 +129,6 @@
     player.changeStone();
   }
 
-  function black_button() {
-    option.clickType = ClickType.BLACK;
-  }
-
-  function white_button() {
-    option.clickType = ClickType.WHITE;
-  }
-
-  function erase_button() {
-    option.clickType = ClickType.ERASE;
-  }
-
   function submit_action() {
     if (!player)
       return;
@@ -154,6 +141,45 @@
     }, false);
 
     $("#sgfdata_field").val(player.sgfTree.toSgf());
+  }
+
+  function change_stone_button() {
+    switch (option.clickType) {
+    case ClickType.MOVE:
+      option.clickType = ClickType.BLACK;
+      break;
+    case ClickType.BLACK:
+      option.clickType = ClickType.WHITE;
+      break;
+    case ClickType.WHITE:
+      option.clickType = ClickType.ERASE;
+      break;
+    case ClickType.ERASE:
+    default:
+      option.clickType = ClickType.MOVE;
+    }
+    apply_stone_button_image();
+  }
+
+  function apply_stone_button_image() {
+    var filename = null;
+    switch (option.clickType) {
+    case ClickType.MOVE:
+      filename = player.rule.getNextStone() == StoneType.BLACK ? "b.png" : "w.png";
+      break;
+    case ClickType.BLACK:
+      filename = "ab.png";
+      break;
+    case ClickType.WHITE:
+      filename = "aw.png";
+      break;
+    case ClickType.ERASE:
+      filename = "ae.png";
+      break;
+    }
+
+    if (filename)
+      $("#stone_button").attr("src", "/images/" + filename);
   }
 </script>
 
@@ -217,14 +243,12 @@
         <img src="/images/btn_forward.png"  class="button" onclick="forward_button();" />
         <img src="/images/btn_fforward.png" class="button" onclick="fforward_button();" />
         <img src="/images/btn_end.png"      class="button" onclick="end_button();" />
+<br />
         <img src="/images/btn_pass.png"     class="button" onclick="pass_button();" />
         <img src="/images/btn_cut.png"      class="button" onclick="cut_button();" />
-<br />
         <img src="/images/number.png"       class="button" onclick="number_button();" />
         <img src="/images/change.png"       class="button" onclick="move_button();" />
-        <img src="/images/ab.png"           class="button" onclick="black_button();" />
-        <img src="/images/aw.png"           class="button" onclick="white_button();" />
-        <img src="/images/ae.png"           class="button" onclick="erase_button();" />
+        <img id="stone_button" class="button" onclick="change_stone_button();" />
 </div>
 </div>
 
