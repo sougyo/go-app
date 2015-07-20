@@ -1741,21 +1741,21 @@ var TreeDrawer = function(player, treeCanvas, ctx) {
     e.preventDefault(e);
     var t = e.changedTouches[0];
     if (t)
-      handleDownEvent(windowToCanvas(e.pageX, e.pageY));
+      handleDownEvent(windowToCanvas(t.pageX, t.pageY));
   });
 
   treeCanvas.addEventListener("touchmove", function(e) {
     e.preventDefault(e);
     var t = e.changedTouches[0];
     if (t)
-      handleMoveEvent(windowToCanvas(e.pageX, e.pageY));
+      handleMoveEvent(windowToCanvas(t.pageX, t.pageY));
   });
 
   treeCanvas.addEventListener("touchend", function(e) {
     e.preventDefault(e);
     var t = e.changedTouches[0];
     if (t)
-      handleUpEvent(windowToCanvas(e.pageX, e.pageY));
+      handleUpEvent(windowToCanvas(t.pageX, t.pageY));
   });
 
   treeCanvas.addEventListener("mousedown", function(e) {
