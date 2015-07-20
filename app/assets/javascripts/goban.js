@@ -1723,8 +1723,15 @@ var TreeDrawer = function(player, treeCanvas, ctx) {
     varThis.draw(true);
   }
 
-  function windowToCanvas(x, y) {
+  function windowToCanvas(x, y, flag) {
     var bbox = treeCanvas.getBoundingClientRect();
+
+    if (flag)
+      alert("pageX: " + x + " pageY: " + y + " bbleft: " + bbox.left + " bbtop: " + bbox.top +
+            " bbwidth: " + bbox.width + " bbheight: " + bbox.height + " canWidth: " + treeCanvas.width +
+            " canHeight: " + treeCanvas.height);
+
+
     return { x: (x - bbox.left) * (treeCanvas.width / bbox.width),
              y: (y - bbox.top)  * (treeCanvas.height / bbox.height)
            }
@@ -1748,17 +1755,8 @@ var TreeDrawer = function(player, treeCanvas, ctx) {
 
   treeCanvas.addEventListener("touchend", function(e) {
     e.preventDefault(e);
-    handleUpEvent(windowToCanvas(e.pageX, e.pageY));
+    handleUpEvent(windowToCanvas(e.pageX, e.pageY, true));
 
-    var bbox = treeCanvas.getBoundingClientRect();
-    alert("pageX: " + e.pageX + " pageY: " + e.pageY + " bbleft: " + bbox.left + " bbtop: " + bbox.top +
-          " bbwidth: " + bbox.width + " bbheight: " + bbox.height + " canWidth: " + treeCanvas.width +
-          " canHeight: " + treeCanvas.height);
-
-    var bbox = treeCanvas.getBoundingClientRect();
-    return { x: (x - bbox.left) * (treeCanvas.width / bbox.width),
-             y: (y - bbox.top)  * (treeCanvas.height / bbox.height)
-           }
   });
 
   treeCanvas.addEventListener("mousedown", function(e) {
@@ -1773,7 +1771,7 @@ var TreeDrawer = function(player, treeCanvas, ctx) {
 
   treeCanvas.addEventListener("mouseup", function(e) {
     e.preventDefault(e);
-    handleUpEvent(windowToCanvas(e.clientX, e.clientY));
+    handleUpEvent(windowToCanvas(e.clientX, e.clientY, true));
   });
 
   this.draw();
