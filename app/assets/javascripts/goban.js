@@ -1754,7 +1754,8 @@ var TreeDrawer = function(player, treeCanvas, ctx) {
   });
 
   treeCanvas.addEventListener("touchend", function(e) {
-var t = e.touches.item(0);
+var t = e.changedTouches[0];
+if (t)
 alert("pageX:" + t.pageX + " clientX: " + t.clientX + " screenX: " + t.screenX);
     e.preventDefault(e);
     handleUpEvent(windowToCanvas(e.pageX, e.pageY, true));
