@@ -1739,23 +1739,26 @@ var TreeDrawer = function(player, treeCanvas, ctx) {
 
   treeCanvas.addEventListener("touchstart", function(e) {
     e.preventDefault(e);
-    var t = e.changedTouches[0];
-    if (t)
-      handleDownEvent(windowToCanvas(t.pageX, t.pageY));
+    if (e.changedTouches.length == 1) {
+      var t = e.changedTouches[0];
+      handleDownEvent(windowToCanvas(t.clientX, t.clientY));
+    }
   });
 
   treeCanvas.addEventListener("touchmove", function(e) {
     e.preventDefault(e);
-    var t = e.changedTouches[0];
-    if (t)
-      handleMoveEvent(windowToCanvas(t.pageX, t.pageY));
+    if (e.changedTouches.length == 1) {
+      var t = e.changedTouches[0];
+      handleMoveEvent(windowToCanvas(t.clientX, t.clientY));
+    }
   });
 
   treeCanvas.addEventListener("touchend", function(e) {
     e.preventDefault(e);
-    var t = e.changedTouches[0];
-    if (t)
-      handleUpEvent(windowToCanvas(t.pageX, t.pageY));
+    if (e.changedTouches.length == 1) {
+      var t = e.changedTouches[0];
+      handleUpEvent(windowToCanvas(t.clientX, t.clientY));
+    }
   });
 
   treeCanvas.addEventListener("mousedown", function(e) {
