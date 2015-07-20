@@ -1754,9 +1754,9 @@ var TreeDrawer = function(player, treeCanvas, ctx) {
   });
 
   treeCanvas.addEventListener("touchend", function(e) {
+alert("pageX:" + e.pageX + " clientX: " + e.clientX + " screenX: " + e.screenX);
     e.preventDefault(e);
     handleUpEvent(windowToCanvas(e.pageX, e.pageY, true));
-
   });
 
   treeCanvas.addEventListener("mousedown", function(e) {
