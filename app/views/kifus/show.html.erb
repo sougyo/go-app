@@ -30,14 +30,14 @@
   }
   div#info_area {
     width: 240px;
-    height: 190px;
+    height: 240px;
     text-align: left;
     padding-top: 10px;
     padding-left: 10px;
   }
   div#tree_area {
     width: 250px;
-    height: 300px;
+    height: 250px;
   }
   div#button_area {
     width: 500px;
@@ -184,17 +184,17 @@
 
     <tr>
     <th>棋力(黒)</th>
-    <td><%= text_field_tag :black_rank %></td>
+    <td><%= select :black_rank, :name, [["1級", "1k"], ["初段", "1d"], ["二段", "2d"], ["三段", "3d"], ["四段", "4d"], ["五段", "5d"], ["六段", "6d"], ["七段", "7d"]]%></td>
     </tr>
 
     <tr>
     <th>棋力(白)</th>
-    <td><%= text_field_tag :white_rank %></td>
+    <td><%= select :white_rank, :name, [["1級", "1k"], ["初段", "1d"], ["二段", "2d"], ["三段", "3d"], ["四段", "4d"], ["五段", "5d"], ["六段", "6d"], ["七段", "7d"]]%></td>
     </tr>
 
     <tr>
     <th>コミ</th>
-    <td><%= text_field_tag :handicap%></td>
+    <td><%= select :handicap, :name, [["6目半", "6.5"], ["なし", ""]]%></td>
     </tr>
 
     <tr>
@@ -202,9 +202,11 @@
     <td><%= text_field_tag :result%></td>
     </tr>
     </table>
+
+    <%= text_area_tag :comment %>
 </div>
 <div id=tree_area>
-    <canvas id="tree_canvas" width=250px height=300px></canvas>
+    <canvas id="tree_canvas" width=250px height=250px></canvas>
 </div>
 </div>
 </div>

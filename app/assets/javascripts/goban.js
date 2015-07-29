@@ -1605,8 +1605,8 @@ var TreeDrawer = function(player, treeCanvas, ctx) {
 
   this.resetPosition = function() {
     if (saveX == null && saveY == null && this.currentX && this.currentY) {
-      transX = -this.currentX + 100;
-      transY = -this.currentY + 100;
+      transX = -this.currentX + 50;
+      transY = -this.currentY + 50;
     }
   }
 
