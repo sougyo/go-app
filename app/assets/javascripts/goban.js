@@ -1420,17 +1420,26 @@ var DefaultGoDrawerFactory = function() {
       if (env.paddingBottom < 20)
         return;
       var ctx = env.ctx;
-      var y = env.paddingTop + env.boardAreaHeight + 25;
+      var y = env.paddingTop + env.boardAreaHeight + 15;
       var basex = env.xOffset + 5;
       ctx.fillStyle = "black";
       ctx.font = "14pt Arial";
-      ctx.fillText("Cnt: "   + player.rule.getCount(), basex + 0, y);
-      ctx.fillText("Black: " + player.rule.getBlackHama(), basex + 80, y);
-      ctx.fillText("White: " + player.rule.getWhiteHama(), basex + 160, y);
-      
+      ctx.textAlign = "left";
+      ctx.textBaseline = "middle";
+      ctx.fillText(player.rule.getBlackHama(), basex + 60, y);
+      ctx.fillText(player.rule.getWhiteHama(), basex + 140, y);
+
+      ctx.strokeStyle = "black";
+      ctx.fillStyle = "black";
+      env.drawCircle(basex + 40, y, 10, true);
+      ctx.fillStyle = "white";
+      env.drawCircle(basex + 120, y, 10, true);
+      env.drawCircle(basex + 120, y, 10, false);
+
+      ctx.fillStyle = "black";
       var move = player.propUtil.getMoveFrom(player.sgfTree.current);
       if (move && move.isPass())
-        ctx.fillText((move.stone == StoneType.BLACK ? "Black" : "White") + " Pass", basex + 260, y);
+        ctx.fillText((move.stone == StoneType.BLACK ? "Black" : "White") + " Pass", basex + 180, y);
     }
   }
 
