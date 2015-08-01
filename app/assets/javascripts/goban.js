@@ -1067,7 +1067,6 @@ var IgoPlayer = function(igoTree) {
   }
 
   this.updateGoban = function() {
-    var nextStone = this.rule.getNextStone();
     this.rule.clear();
     var nodes = this.sgfTree.toSequence();
     for (var i = 0; i < nodes.length; i++) {
@@ -1085,7 +1084,6 @@ var IgoPlayer = function(igoTree) {
         }
       }
     }
-    this.rule.setNextStone(nextStone);
     this.notify();
   }
 
@@ -1177,7 +1175,7 @@ var IgoPlayer = function(igoTree) {
     this.sgfTree.current = node;
 
     var p = node.parentNode;
-    while (p !== this.sgfTree.root && p !== this.propUtil.getRootPropNode()) {
+    while (p !== this.sgfTree.root) {
       var t = null;
       for (var i = 0; i < p.children.length; i++) {
         if (p.children[i] === node) {

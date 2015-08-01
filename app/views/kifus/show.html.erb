@@ -48,6 +48,9 @@
 </style>
 
 <script>
+  var rank_list = <%= raw @rank_list.to_json %>;
+  var komi_list = <%= raw @komi_list.to_json %>;
+
   var player = null;
   var option = {
     bgColor:         'rgb(252, 247, 242)',
@@ -75,6 +78,7 @@
     option.clickType = ClickType.MOVE;
     player.addListener(function() {
       apply_stone_button_image();
+      /* $('#testarea2').text(tree.toSgf()); */
     });
     apply_stone_button_image();
 
@@ -85,6 +89,20 @@
     $('#white_player').val(player.propUtil.getRootPropNode().getProperty("PW"));
     $('#black_rank').val(player.propUtil.getRootPropNode().getProperty("BR"));
     $('#white_rank').val(player.propUtil.getRootPropNode().getProperty("WR"));
+    $('#komi').val(player.propUtil.getRootPropNode().getProperty("KM"));
+    $('#result').val(player.propUtil.getRootPropNode().getProperty("RE"));
+
+    var foo = player.propUtil.getRootPropNode().getProperty("DT");
+    if (foo) {
+      var bar = foo.match(/(\d\d\d\d)[\-\/](\d\d)[\-\/](\d\d)/);
+
+      if (bar && bar.length == 4) {
+        $('#info_infodate_1i').val(Number(bar[1]));
+        $('#info_infodate_2i').val(Number(bar[2]));
+        $('#info_infodate_3i').val(Number(bar[3]));
+      }
+    }
+
   });
 
   function forward_button() {
@@ -121,7 +139,7 @@
 
   function number_button() {
     option.stoneNumber = !option.stoneNumber;
-    player.updateGoban();
+    player.notify();
   }
 
   function move_button() {
@@ -133,12 +151,23 @@
     if (!player)
       return;
 
+    var date = undefined;
+    var y = $('#info_infodate_1i').val();
+    var m = $('#info_infodate_2i').val();
+    var d = $('#info_infodate_3i').val();
+    if (y && m && d) {
+      date = y + "-" + ("0" + m).slice(-2) + "-" + ("0" + d).slice(-2);
+    }
+
     player.propUtil.getRootPropNode().setProperties({
       PB: $("#black_player").val(),
       PW: $("#white_player").val(),
       BR: $("#black_rank").val(),
       WR: $("#white_rank").val(),
-    }, false);
+      KM: $("#komi").val(),
+      RE: $("#result").val(),
+      DT: date
+    }, true);
 
     $("#sgfdata_field").val(player.sgfTree.toSgf());
   }
@@ -195,7 +224,7 @@
     <table>
     <tr>
     <th>Date</th>
-    <td><%= date_select :info, :infodate %></td>
+    <td><%= date_select :info, :infodate, include_blank: true %></td>
     </tr>
 
     <tr>
@@ -210,17 +239,17 @@
 
     <tr>
     <th>棋力(黒)</th>
-    <td><%= select :black_rank, :name, [["1級", "1k"], ["初段", "1d"], ["二段", "2d"], ["三段", "3d"], ["四段", "4d"], ["五段", "5d"], ["六段", "6d"], ["七段", "7d"]]%></td>
+    <td><%= select_tag :black_rank, options_for_select(@rank_list) %></td>
     </tr>
 
     <tr>
     <th>棋力(白)</th>
-    <td><%= select :white_rank, :name, [["1級", "1k"], ["初段", "1d"], ["二段", "2d"], ["三段", "3d"], ["四段", "4d"], ["五段", "5d"], ["六段", "6d"], ["七段", "7d"]]%></td>
+    <td><%= select_tag :white_rank, options_for_select(@rank_list) %></td>
     </tr>
 
     <tr>
     <th>コミ</th>
-    <td><%= select :handicap, :name, [["6目半", "6.5"], ["なし", ""]]%></td>
+    <td><%= select_tag :komi, options_for_select(@komi_list) %></td>
     </tr>
 
     <tr>
@@ -271,5 +300,8 @@
       <%= f.submit %>
     </div>
   <% end %>
+
+<div id="testarea1"></div>
+<div id="testarea2"></div>
 
 <%= link_to 'Back', sec_room_path(@kifu.room) %>
