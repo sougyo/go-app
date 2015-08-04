@@ -71,28 +71,39 @@
     }
 
     player = new IgoPlayer(tree);
+
     var drawer = createDrawer(player, "goban_canvas", "tree_canvas", option);
     drawer.resize(500, 500);
-
 
     option.clickType = ClickType.MOVE;
     player.addListener(function() {
       apply_stone_button_image();
-      /* $('#testarea2').text(tree.toSgf()); */
+      var c = tree.current.getProperty("C");
+      $('#comment').val(c ? c : "");
+      $('#testarea2').text(tree.toSgf());
     });
     apply_stone_button_image();
 
 
     player.updateGoban();
 
-    $('#black_player').val(player.propUtil.getRootPropNode().getProperty("PB"));
-    $('#white_player').val(player.propUtil.getRootPropNode().getProperty("PW"));
-    $('#black_rank').val(player.propUtil.getRootPropNode().getProperty("BR"));
-    $('#white_rank').val(player.propUtil.getRootPropNode().getProperty("WR"));
-    $('#komi').val(player.propUtil.getRootPropNode().getProperty("KM"));
-    $('#result').val(player.propUtil.getRootPropNode().getProperty("RE"));
+    $('#black_player').val(tree.getRoot().getProperty("PB"));
+    $('#white_player').val(tree.getRoot().getProperty("PW"));
+    $('#black_rank').val(tree.getRoot().getProperty("BR"));
+    $('#white_rank').val(tree.getRoot().getProperty("WR"));
+    $('#komi').val(tree.getRoot().getProperty("KM"));
+    $('#result').val(tree.getRoot().getProperty("RE"));
 
-    var foo = player.propUtil.getRootPropNode().getProperty("DT");
+    $('#comment').bind('input', function() {
+      var c = $('#comment').val();
+      if (c)
+        tree.current.setProperty("C", c);
+      else
+        tree.current.removeProperty("C");
+      player.notify();
+    });
+
+    var foo = tree.getRoot().getProperty("DT");
     if (foo) {
       var bar = foo.match(/(\d\d\d\d)[\-\/](\d\d)[\-\/](\d\d)/);
 
@@ -159,7 +170,7 @@
       date = y + "-" + ("0" + m).slice(-2) + "-" + ("0" + d).slice(-2);
     }
 
-    player.propUtil.getRootPropNode().setProperties({
+    player.sgfTree.getRoot().setProperties({
       PB: $("#black_player").val(),
       PW: $("#white_player").val(),
       BR: $("#black_rank").val(),
@@ -211,8 +222,6 @@
       $("#stone_button").attr("src", "/images/" + filename);
   }
 </script>
-
-<h1><%= @kifu.title %></h1>
 
 <div id=main_area>
 <div id=body_area>

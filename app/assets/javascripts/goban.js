@@ -467,7 +467,7 @@ var SgfReader = function() {
     pos  = 0;
 
     var tree = new SgfTree();
-    readCollection(tree.root);
+    readCollection(tree.superRoot);
     tree.resetIndexes();
     return tree;
   }
@@ -718,8 +718,23 @@ var SgfNode = function(parentNode) {
 }
 
 var SgfTree = function() {
-  this.root = new SgfNode(null);
-  this.current = this.root;
+  this.superRoot = new SgfNode(null);
+  this.current = this.superRoot;
+
+  this.getRoot = function() {
+    if (!this.superRoot.hasChild())
+      throw new Error("SgfTree has no any tree");
+
+    return this.superRoot.getChild();
+  }
+
+  this.getRootIndex = function() {
+    return this.superRoot.childIndex;
+  }
+
+  this.setRootIndex = function(index) {
+    this.superRoot.setChildIndex(index);
+  }
 
   this.newChild = function() {
     this.current.addChild(new SgfNode(this.current));
@@ -727,6 +742,9 @@ var SgfTree = function() {
   }
 
   this.insertNewNode = function() {
+    if (this.current === this.superRoot)
+      return;
+
     var cur = this.current;
 
     if (cur.hasChild()) {
@@ -741,6 +759,9 @@ var SgfTree = function() {
   }
 
   this.forward = function() {
+    if (this.current === this.superRoot)
+      return;
+
     if (this.current.hasChild()) {
       this.current = this.current.getChild();
       return true;
@@ -748,6 +769,9 @@ var SgfTree = function() {
   }
 
   this.forwardTo = function(index) {
+    if (this.current === this.superRoot)
+      return;
+
     if (this.current.setChildIndex(index)) {
       this.current = this.current.getChild();
       return true;
@@ -755,14 +779,20 @@ var SgfTree = function() {
   }
 
   this.back = function() {
-    if (this.current != this.root) {
+    if (this.current === this.superRoot)
+      return;
+
+    if (this.current.parentNode != this.superRoot) {
       this.current = this.current.parentNode;
       return true;
     }
   }
 
   this.cut = function() {
-    if (this.current != this.root) {
+    if (this.current === this.superRoot)
+      return;
+
+    if (this.current.parentNode != this.superRoot) {
       this.current = this.current.parentNode;
       this.current.removeChild();
       return true;
@@ -770,18 +800,21 @@ var SgfTree = function() {
   }
 
   this.toSequence = function() {
+    if (this.current === this.superRoot)
+      return;
+
     var nodes = [];
-    for (var cur = this.current; cur != this.root; cur = cur.parentNode)
+    for (var cur = this.current; cur != this.superRoot; cur = cur.parentNode)
       nodes.unshift(cur);
     return nodes;
   }
 
   this.copy = function() {
     var tree = new SgfTree();
-    tree.root = this.root.copy(null);
+    tree.superRoot = this.superRoot.copy(null);
 
-    var cur1 = this.root;
-    var cur2 = tree.root;
+    var cur1 = this.superRoot;
+    var cur2 = tree.superRoot;
     while (cur1) {
       if (cur1 === this.current) {
         tree.current = cur2;
@@ -802,8 +835,8 @@ var SgfTree = function() {
   }
 
   this.resetIndexes = function() {
-    this.current = this.root;
-    resetIndexesHelper(this.root);
+    resetIndexesHelper(this.superRoot);
+    this.current = this.getRoot();
   }
 
   function resetIndexesHelper(node) {
@@ -831,7 +864,7 @@ var SgfTree = function() {
         if (flag) result += ")";
       }
     }
-    writeHelepr(this.root, true);
+    writeHelepr(this.superRoot, true);
     return result;
   }
 }
@@ -930,15 +963,13 @@ var PropUtil = function(tree) {
   }
 
   this.addSetupProperty = function(x, y, stone) {
-    if (this.tree.current.hasChild())
-      return false;
-
     var stoneIdent = findKey(setupPropDict, stone);
     if (!stoneIdent)
       return false;
 
-    if (!existsIn(setupPropDict, this.tree.current))
-      this.tree.insertNewNode();
+    if (this.tree.current.hasChild() ||
+         (this.tree.current != this.tree.getRoot() && !existsIn(setupPropDict, this.tree.current)))
+      this.tree.newChild();
 
     var node = this.tree.current;
     removeMatchedSetupPoint(node, x, y);
@@ -951,60 +982,17 @@ var PropUtil = function(tree) {
     return true;
   }
 
-  this.isStoneProp = function() {
-    var node = this.tree.current();
-    return (this.getMoveFrom(node) || this.getSetupMovesFrom(node)) ? true : false;
-  }
-
-  this.isRootNode = function() {
-    return this.tree.current == this.tree.root;
-  }
-
-  this.isRootPropNode = function() {
-    return this.tree.current.parentNode == this.tree.root;
-  }
-
-  this.getRootPropNode = function() {
-    return this.tree.root.getChild();
-  }
-
-  this.getGameInfoPropNode = function() {
-    return this.getRootPropNode();
-  }
-
-  this.isLeafNode = function() {
-    return !this.tree.current.hasChild();
-  }
-
-  this.backToHead = function() {
-    while (true) {
-      if (this.isRootNode() || this.isRootPropNode())
-        break;
-      this.tree.back();
-    }
-  }
-
-  this.forwardToTail = function() {
-    while (true) {
-      if (this.isLeafNode())
-        break;
-      this.tree.forward();
-    }
-  }
-
-  this.getGobanSize = function() {
-    return this.getRootPropNode().getProperty("SZ");
+  this.getGobanSize = function(tree) {
+    return tree.getRoot().getProperty("SZ");
   }
 
   this.initIgoTree = function(size) {
-    tree.resetIndexes();
-
-    if (tree.root.hasChild())
-      tree.forward();
-    else
+    if (!tree.superRoot.hasChild())
       tree.newChild();
 
-    this.getRootPropNode().setProperties({
+    tree.resetIndexes();
+
+    tree.getRoot().setProperties({
       "FF": 4,
       "GM": 1,
       "SZ": size
@@ -1035,7 +1023,7 @@ var IgoPlayer = function(igoTree) {
   this.sgfTree = igoTree;
   this.propUtil = new PropUtil(igoTree);
 
-  this.size = this.propUtil.getGobanSize();
+  this.size = this.propUtil.getGobanSize(igoTree);
   if (!this.size)
     throw new Error("cannot get size");
 
@@ -1092,11 +1080,8 @@ var IgoPlayer = function(igoTree) {
   }
 
   this.backN = function(n) {
-    for (var i = 0; i < n; i++) {
-      if (this.propUtil.isRootPropNode())
-        break;
+    for (var i = 0; i < n; i++)
       this.sgfTree.back();
-    }
     this.updateGoban();
   }
 
@@ -1105,27 +1090,22 @@ var IgoPlayer = function(igoTree) {
   }
 
   this.forwardN = function(n) {
-    for (var i = 0; i < n; i++) {
-      if (!this.sgfTree.current.hasChild())
-        break;
+    for (var i = 0; i < n; i++)
       this.sgfTree.forward();
-    }
     this.updateGoban();
   }
 
   this.backToHead = function() {
-    this.propUtil.backToHead();
+    while (this.sgfTree.back());
     this.updateGoban();
   }
 
   this.forwardToTail = function() {
-    this.propUtil.forwardToTail();
+    while (this.sgfTree.forward());
     this.updateGoban();
   }
 
   this.cut = function() {
-    if (this.propUtil.isRootPropNode())
-      return;
     if (this.sgfTree.cut())
       this.updateGoban();
   }
@@ -1169,13 +1149,13 @@ var IgoPlayer = function(igoTree) {
   }
 
   this.setCurrent = function(node) {
-    if (!existsNode(this.propUtil.getRootPropNode(), node))
+    if (!existsNode(this.sgfTree.getRoot(), node))
       return;
 
     this.sgfTree.current = node;
 
     var p = node.parentNode;
-    while (p !== this.sgfTree.root) {
+    while (p !== this.sgfTree.superRoot) {
       var t = null;
       for (var i = 0; i < p.children.length; i++) {
         if (p.children[i] === node) {
@@ -1554,8 +1534,8 @@ var TreeDrawer = function(player, treeCanvas, ctx) {
 
   function drawLine(x1, y1, x2, y2) {
     ctx.beginPath();
-    ctx.moveTo(x1 + 0.5, y1 + 0.5);
-    ctx.lineTo(x2 + 0.5, y2 + 0.5);
+    ctx.moveTo(x1, y1);
+    ctx.lineTo(x2, y2);
     ctx.stroke();
   }
 
@@ -1570,7 +1550,7 @@ var TreeDrawer = function(player, treeCanvas, ctx) {
 
   function makeMatrix() {
     var matrix = new Array();
-    makeMatrixHelper(matrix, player.sgfTree.root, 0, 0);
+    makeMatrixHelper(matrix, player.sgfTree.getRoot(), 0, 0);
     return matrix;
   }
 
@@ -1725,7 +1705,6 @@ var TreeDrawer = function(player, treeCanvas, ctx) {
 
   function windowToCanvas(x, y) {
     var bbox = treeCanvas.getBoundingClientRect();
-
     return { x: (x - bbox.left) * (treeCanvas.width / bbox.width),
              y: (y - bbox.top)  * (treeCanvas.height / bbox.height)
            }

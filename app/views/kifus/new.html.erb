@@ -15,7 +15,7 @@ function submit_action() {
 
   var propUtil = new PropUtil(tree);
 
-  propUtil.getRootPropNode().setProperties({
+  tree.getRoot().setProperties({
     DT: date,
     SZ: size,
     PB: $("#black_player").val(),
@@ -33,11 +33,6 @@ function submit_action() {
 <%= form_tag kifus_path, {method: "post", onsubmit: "return submit_action();"} do %>
 
 <table>
-
-<tr>
-<th>棋譜名</th>
-<td><%= text_field_tag :title %></td>
-</tr>
 
 <tr>
 <th>サイズ</th>

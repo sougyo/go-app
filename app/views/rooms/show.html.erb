@@ -6,7 +6,6 @@
 <table>
   <thead>
     <tr>
-      <th>棋譜名</th>
       <th>対局日</th>
       <th>黒番</th>
       <th>白番</th>
@@ -20,7 +19,6 @@
       <% kifu.sgfdata =~ /PB\[([^\]]*)\]/; pb = $1.to_s %>
       <% kifu.sgfdata =~ /PW\[([^\]]*)\]/; pw = $1.to_s %>
       <tr>
-        <td><%= kifu.title %></td>
         <td><%= dt %></td>
         <td><%= pb %></td>
         <td><%= pw %></td>
