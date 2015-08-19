@@ -1436,7 +1436,7 @@ var DefaultGoDrawerFactory = function() {
       for (var i = 0; i < nodes.length; i++) {
         var node = nodes[i];
         var move = player.propUtil.getMoveFrom(node);
-        if (move.stone == stone)
+        if (move && move.stone == stone)
           env.drawCircle(env.toX(move.x), env.toY(move.y), pointSize, true);
       }
     }
