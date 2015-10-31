@@ -3,48 +3,61 @@
 <meta name='viewport' content='width=800 '/>
 
 <style>
-  img.button {
-    width: 70px;
-    height: 70px;
-    margin-left: 8px;
-    margin-bottom: 10px;
-  }
-  div#main_area {
-    margin-top: 30px;
+
+  div#contents_area {
+    width: 90%;
     margin-left: 30px;
-    padding: 0px;
   }
-  div#body_area{
-    width: 750px;
-    height: 500px;
-  }
+
   div#goban_area {
-    width: 500px;
-    height: 500px;
+    width: 800px;
+  }
+
+  div#goban_header {
+    width: 800px;
+    height: 20px;
+    background-color: #aaaaaa;
+  }
+
+  div#goban_body {
     float: left;
-  }
-  div#subpanel_area {
-    width: 250px;
-    height: 500px;
-    float: right;
-  }
-  div#info_area {
-    width: 240px;
-    height: 240px;
-    text-align: left;
-    padding-top: 10px;
-    padding-left: 10px;
-  }
-  div#tree_area {
-    width: 250px;
-    height: 250px;
-  }
-  div#button_area {
     width: 500px;
-    margin-top: 20px;
-    margin-bottom: 20px;
-    float: clear;
   }
+
+  div#goban_right {
+    float: right;
+    width: 290px;
+    text-align: left;
+    padding-left: 10px;
+    padding-top: 10px;
+  }
+
+  div#goban_board_area {
+    width: 500px;
+    height: 500px;
+  }
+
+  div#operation_button_area {
+    width: 100%;
+  }
+
+  div#goban_footer {
+    width: 800px;
+    display: inline-block;
+  }
+
+  img.button {
+    width: 40px;
+    height: 40px;
+  }
+
+  div#sgfarea {
+    width: 700px;
+    height: 50px;
+    word-wrap: break-word;
+    overflow: auto;
+  }
+
 </style>
 
 <script>
@@ -80,7 +93,10 @@
       apply_stone_button_image();
       var c = tree.current.getProperty("C");
       $('#comment').val(c ? c : "");
-      $('#testarea2').text(tree.toSgf());
+      $('#sgfarea').text(tree.toSgf());
+      var obj = document.getElementById('sgfarea');
+      if(obj)
+        obj.scrollTop = obj.scrollHeight;
     });
     apply_stone_button_image();
 
@@ -223,16 +239,41 @@
   }
 </script>
 
-<div id=main_area>
-<div id=body_area>
-<div id=goban_area>
-  <canvas id="goban_canvas" width=500px height=500px></canvas>
-</div>
-<div id=subpanel_area>
-<div id=info_area>
+
+<div id=contents_area>
+
+ <div id=goban_area>
+
+  <div id=goban_header>
+
+  </div>
+
+  <div id=goban_body>
+
+    <div id=goban_board_area>
+    <canvas id="goban_canvas" width=500px height=500px></canvas>
+    </div>
+
+    <div id=operation_button_area>
+      <img src="/images/btn_begin.png"    class="button" onclick="begin_button();" />
+      <img src="/images/btn_bback.png"    class="button" onclick="bback_button();" />
+      <img src="/images/btn_back.png"     class="button" onclick="back_button();" />
+      <img src="/images/btn_forward.png"  class="button" onclick="forward_button();" />
+      <img src="/images/btn_fforward.png" class="button" onclick="fforward_button();" />
+      <img src="/images/btn_end.png"      class="button" onclick="end_button();" />
+      <img src="/images/btn_pass.png"     class="button" onclick="pass_button();" />
+      <img src="/images/btn_cut.png"      class="button" onclick="cut_button();" />
+      <img src="/images/number.png"       class="button" onclick="number_button();" />
+      <img src="/images/change.png"       class="button" onclick="move_button();" />
+      <img id="stone_button" class="button" onclick="change_stone_button();" />
+    </div>
+
+  </div>
+
+  <div id=goban_right>
     <table>
     <tr>
-    <th>Date</th>
+    <th>対局日</th>
     <td><%= date_select :info, :infodate, include_blank: true %></td>
     </tr>
 
@@ -258,51 +299,29 @@
 
     <tr>
     <th>コミ</th>
-    <td><%= select_tag :komi, options_for_select(@komi_list) %></td>
+    <td><%= number_field_tag :komi, 6.5, size: 3, step: 0.5, style: "width: 50px" %></td>
     </tr>
 
     <tr>
     <th>対局結果</th>
-    <td><%= text_field_tag :result%></td>
+    <td><%= text_field_tag :result %></td>
     </tr>
     </table>
 
-    <%= text_area_tag :comment %>
-</div>
-<div id=tree_area>
+    <%= text_area_tag :comment, '', size: "30x3" %>
+    <br />
+    <br />
     <canvas id="tree_canvas" width=250px height=250px></canvas>
-</div>
-</div>
-</div>
-<div id=button_area>
-        <img src="/images/btn_begin.png"    class="button" onclick="begin_button();" />
-        <img src="/images/btn_bback.png"    class="button" onclick="bback_button();" />
-        <img src="/images/btn_back.png"     class="button" onclick="back_button();" />
-        <img src="/images/btn_forward.png"  class="button" onclick="forward_button();" />
-        <img src="/images/btn_fforward.png" class="button" onclick="fforward_button();" />
-        <img src="/images/btn_end.png"      class="button" onclick="end_button();" />
-<br />
-        <img src="/images/btn_pass.png"     class="button" onclick="pass_button();" />
-        <img src="/images/btn_cut.png"      class="button" onclick="cut_button();" />
-        <img src="/images/number.png"       class="button" onclick="number_button();" />
-        <img src="/images/change.png"       class="button" onclick="move_button();" />
-        <img id="stone_button" class="button" onclick="change_stone_button();" />
-</div>
-</div>
+  </div>
+
+  <div id=goban_footer>
+    <div id="sgfarea"></div>
+  </div>
+
+  <br />
+  </div>
 
   <%= form_for(@kifu, html: {onsubmit: "return submit_action();"}) do |f| %>
-    <% if @kifu.errors.any? %>
-      <div id="error_explanation">
-        <h2><%= pluralize(@kifu.errors.count, "error") %> prohibited this kifu from being saved:</h2>
-
-        <ul>
-        <% @kifu.errors.full_messages.each do |message| %>
-          <li><%= message %></li>
-        <% end %>
-        </ul>
-      </div>
-    <% end %>
-
     <%= hidden_field_tag :ktok, @kifu.key %>
     <%= f.hidden_field :sgfdata, id: "sgfdata_field"  %>
     <div class="actions">
@@ -310,7 +329,7 @@
     </div>
   <% end %>
 
-<div id="testarea1"></div>
-<div id="testarea2"></div>
+</div>
+
 
 <%= link_to 'Back', sec_room_path(@kifu.room) %>
