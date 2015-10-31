@@ -1201,14 +1201,14 @@ var GoDrawerEnv = function(size, ctx) {
 
   this.drawLine = function(x1, y1, x2, y2) {
     ctx.beginPath();
-    ctx.moveTo(x1, y1);
-    ctx.lineTo(x2, y2);
+    ctx.moveTo(x1 + 0.5, y1 + 0.5);
+    ctx.lineTo(x2 + 0.5, y2 + 0.5);
     ctx.stroke();
   }
 
   this.drawCircle = function(x, y, r, fill) {
     ctx.beginPath();
-    ctx.arc(x, y, r, 0, Math.PI*2, false);
+    ctx.arc(x + 0.5, y + 0.5, r, 0, Math.PI*2, false);
     if (fill)
       ctx.fill();
     else
@@ -1217,7 +1217,7 @@ var GoDrawerEnv = function(size, ctx) {
 
   this.drawImage = function(image, x, y, width, height) {
     try {
-      ctx.drawImage(image, x, y, width, height);
+      ctx.drawImage(image, x + 0.5, y + 0.5, width, height);
     } catch (e) {
       if (e.name != "NS_ERROR_NOT_AVAILABLE")
       throw e;
@@ -1651,6 +1651,7 @@ var TreeDrawer = function(player, treeCanvas, ctx) {
 
     for  (var i = 0; i < circles.length; i++) {
       var a = circles[i];
+      ctx.lineWidth = 2;
       ctx.strokeStyle = a[0];
       ctx.fillStyle   = a[0];
       drawCircle(a[1], a[2], a[3], a[4]);

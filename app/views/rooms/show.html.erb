@@ -1,14 +1,32 @@
+<style>
+
+table {
+  border-collapse: collapse;
+}
+
+tr {
+  border: 1px #000000 solid;
+}
+
+td, th {
+  padding: 8px 8px 8px 8px;
+}
+
+</style>
+
+
+
 <h1><%= @room.name %></h1>
-<%= link_to 'Edit', edit_room_path(@room) %>
+<%= link_to '編集', edit_room_path(@room) %>
 
 <br />
 <br />
 <table>
   <thead>
     <tr>
-      <th>対局日</th>
-      <th>黒番</th>
-      <th>白番</th>
+      <th width=100px>対局日</th>
+      <th width=150px>黒番</th>
+      <th width=150px>白番</th>
       <th colspan="2"></th>
     </tr>
   </thead>
@@ -22,8 +40,8 @@
         <td><%= dt %></td>
         <td><%= pb %></td>
         <td><%= pw %></td>
-        <td><%= link_to 'Show', sec_kifu_path(kifu) %></td>
-        <td><%= link_to 'Destroy', sec_kifu_path(kifu), method: :delete, data: { confirm: 'Are you sure?' } %></td>
+        <td><%= link_to '表示', sec_kifu_path(kifu) %></td>
+        <td><%= link_to '削除', sec_kifu_path(kifu), method: :delete, data: { confirm: 'Are you sure?' } %></td>
       </tr>
     <% end %>
   </tbody>
@@ -31,11 +49,12 @@
 
 <br>
 
-<%= link_to 'New Kifu', sec_new_kifu_path(@room) %>
+<%= link_to '新規', sec_new_kifu_path(@room) %>
 
 <br />
+<br />
 <%= form_tag({controller: :kifus, action: :create, method: "post" }, {multipart: true}) do %>
-Sgf file Update:
+Sgf アップロード:<br />
 <%= file_field_tag 'sgffile' %>
 <%= hidden_field_tag :rid,  @room.id  %>
 <%= hidden_field_tag :rtok, @room.key %>
