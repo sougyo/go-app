@@ -1,26 +1,61 @@
 <style>
 
 table {
-  border-collapse: collapse;
+  width: auto;
+  border-spacing: 0;
+  font-size: 14pt;
 }
 
-tr {
-  border: 1px #000000 solid;
+table th {
+  color: #fff;
+  padding: 8px 15px;
+  background: #258;
+  background:-moz-linear-gradient(rgba(34,85,136,0.7), rgba(34,85,136,0.9) 50%);
+  background:-webkit-gradient(linear, 100% 0%, 100% 50%, from(rgba(34,85,136,0.7)), to(rgba(34,85,136,0.9)));
+  font-weight: bold;
+  border-left:1px solid #258;
+  border-top:1px solid #258;
+  border-bottom:1px solid #258;
+  line-height: 120%;
+  text-align: center;
+  text-shadow:0 -1px 0 rgba(34,85,136,0.9);
+  box-shadow: 0px 1px 1px rgba(255,255,255,0.3) inset;
 }
 
-td, th {
-  padding: 8px 8px 8px 8px;
+table th:last-child {
+  border-radius:0 5px 0 0;
+  border-right:1px solid #aaa;
 }
+
+table tr td {
+  padding: 8px 15px;
+  border-bottom: 1px solid #84b2e0;
+  border-left: 1px solid #84b2e0;
+  text-align: left;
+}
+
+table tr td:last-child {
+  border-right: 1px solid #aaa;
+}
+
+table tr {
+  background: #fff;
+}
+
+table tr:nth-child(2n+1) {
+  background: #f1f6fc;
+}
+
 
 </style>
 
 
 
-<h1><%= @room.name %></h1>
-<%= link_to '編集', edit_room_path(@room) %>
+<h1><%= link_to @room.name, edit_room_path(@room) %></h1>
 
 <br />
 <br />
+<%= link_to '新規', sec_new_kifu_path(@room) %>
 <table>
   <thead>
     <tr>
@@ -49,7 +84,6 @@ td, th {
 
 <br>
 
-<%= link_to '新規', sec_new_kifu_path(@room) %>
 
 <br />
 <br />

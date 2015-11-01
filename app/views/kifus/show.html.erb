@@ -8,16 +8,21 @@
     width: 90%;
     margin-left: 30px;
     margin-top: 30px;
+    margin-bottom: 40px;
   }
 
   div#goban_area {
-    width: 800px;
+    width: 832px;
+    border-top:3px solid #258;
+    border-left:3px solid #258;
+    border-right:3px solid #258;
+    border-bottom:3px solid #258;
   }
 
   div#goban_header {
-    width: 800px;
-    height: 10px;
-    background-color: #555555;
+    width: 832px;
+    height: 0px;
+    background-color: #a5a5f5;
   }
 
   div#goban_body {
@@ -27,10 +32,11 @@
 
   div#goban_right {
     float: right;
-    width: 290px;
+    width: 310px;
     text-align: left;
-    padding-left: 10px;
-    padding-top: 10px;
+    padding-left: 20px;
+    padding-top: 20px;
+    line-height: 180%;
   }
 
   div#goban_board_area {
@@ -40,11 +46,18 @@
 
   div#operation_button_area {
     width: 100%;
+    padding-left: 5px;
+    padding-top: 15px;
+    padding-bottom: 15px;
   }
 
   div#goban_footer {
-    width: 800px;
+    width: 832px;
     display: inline-block;
+    border-right:1px solid #258;
+    border-top:1px solid #258;
+    padding-top: 15px;
+    padding-bottom: 15px;
   }
 
   img.button {
@@ -58,6 +71,11 @@
     word-wrap: break-word;
     overflow: auto;
   }
+
+input[type="text"], input[type="number"], textarea, select {
+        outline: none;
+        border: 1px solid #aaa;
+}
 
 </style>
 
@@ -232,6 +250,8 @@
 
 <div id=contents_area>
 
+ <%= link_to '戻る', sec_room_path(@kifu.room) %>
+
  <div id=goban_area>
 
   <div id=goban_header>
@@ -268,12 +288,12 @@
 
     <tr>
     <th>黒番</th>
-    <td><%= text_field_tag :black_player %></td>
+    <td><%= text_field_tag :black_player, '', style: "width: 218px;" %></td>
     </tr>
 
     <tr>
     <th>白番</th>
-    <td><%= text_field_tag :white_player %></td>
+    <td><%= text_field_tag :white_player, '', style: "width: 218px;" %></td>
     </tr>
 
     <tr>
@@ -293,14 +313,14 @@
 
     <tr>
     <th>対局結果</th>
-    <td><%= text_field_tag :result %></td>
+    <td><%= text_field_tag :result, '', style: "width: 218px;" %></td>
     </tr>
     </table>
 
-    <%= text_area_tag :comment, '', size: "30x3" %>
+    <%= text_area_tag :comment, '', size: "33x3" %>
     <br />
     <br />
-    <canvas id="tree_canvas" width=250px height=250px></canvas>
+    <canvas id="tree_canvas" width=285px height=235px></canvas>
   </div>
 
   <div id=goban_footer>
@@ -321,4 +341,3 @@
 </div>
 
 
-<%= link_to 'Back', sec_room_path(@kifu.room) %>

@@ -703,7 +703,7 @@ var SgfNode = function(parentNode) {
 
     var result = "";
     for (var i = 0; i < propValue.length; i++)
-      result += "[" + propValue[i].toString() + "]";
+      result += "[" + propValue[i].toString().replace(/\]/g, "\\]") + "]";
     return result;
   }
 
@@ -859,7 +859,7 @@ var SgfTree = function() {
       for (var i = 0; i < children.length; i++) {
         if (flag) result += "(";
         var child = children[i];
-        result += child;
+        result += child.toString();
         writeHelepr(child, false);
         if (flag) result += ")";
       }
