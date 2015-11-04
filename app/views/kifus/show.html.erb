@@ -1,18 +1,17 @@
 <p id="notice"><%= notice %></p>
 
-<meta name='viewport' content='width=600 '/>
-
 <style>
 
   div#contents_area {
-    width: 90%;
+    width: 520px;
     margin-left: 30px;
     margin-top: 30px;
     margin-bottom: 40px;
   }
 
   div#goban_area {
-    width: 600px;
+    margin-top: 30px;
+    width: 500px;
     border:1px solid black;
   }
 
@@ -147,7 +146,7 @@
     player = new IgoPlayer(tree);
 
     var drawer = createDrawer(player, "goban_canvas", "tree_canvas", option);
-    drawer.resize(600, 600);
+    drawer.resize(500, 500);
 
     option.clickType = ClickType.MOVE;
     player.addListener(function() {
@@ -253,13 +252,12 @@
  <%= form_for(@kifu, html: {onsubmit: "return submit_action();"}) do |f| %>
    <%= hidden_field_tag :ktok, @kifu.key %>
    <%= f.hidden_field :sgfdata, id: "sgfdata_field"  %>
-   <div class="actions" style="width: 680px; margin-left: auto;">
+   <div class="actions" style="float: right;">
      <%= f.submit %>
    </div>
  <% end %>
 
  <div id=goban_area>
-
     <div class=open_button>対局情報</div>
     <div id=play_info>
       <table>
@@ -303,7 +301,7 @@
 
     <div class=open_button id=board_open_button>碁盤</div>
     <div id=goban_board>
-      <canvas id="goban_canvas" width=600px height=600px></canvas>
+      <canvas id="goban_canvas" width=500px height=500px></canvas>
       <div id=operation_button_area>
         <img src="/images/btn_begin.png"    class="button" onclick="player.backToHead();" />
         <img src="/images/btn_bback.png"    class="button" onclick="player.backN(10);" />
@@ -320,7 +318,7 @@
     </div>
 
     <div class=open_button>木</div>
-    <div id=tree_area><canvas id="tree_canvas" width=600px height=200px></canvas></div>
+    <div id=tree_area><canvas id="tree_canvas" width=500px height=200px></canvas></div>
 
     <div class=open_button>SGF</div>
     <div id="sgfarea"></div>
