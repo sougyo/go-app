@@ -20,7 +20,7 @@ class KifusController < ApplicationController
 
     @komi_list = [["7目半", "7.5"], ["6目半", "6.5"], ["5目半", "5.5"], ["4目半", "4.5"], ["なし", "0"],
                   ["逆コミ4目半", "-4.5"], ["逆コミ5目半", "-5.5"], ["逆コミ6目半", "-6.5"], ["逆コミ7目半", "-7.5"]];
-    @viewport = 650
+    @viewport = 560
   end
 
   # GET /kifus/new
