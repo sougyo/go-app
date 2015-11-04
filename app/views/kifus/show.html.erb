@@ -1,6 +1,6 @@
 <p id="notice"><%= notice %></p>
 
-<meta name='viewport' content='width=800 '/>
+<meta name='viewport' content='width=600 '/>
 
 <style>
 
@@ -12,52 +12,8 @@
   }
 
   div#goban_area {
-    width: 832px;
-    border-top:3px solid #258;
-    border-left:3px solid #258;
-    border-right:3px solid #258;
-    border-bottom:3px solid #258;
-  }
-
-  div#goban_header {
-    width: 832px;
-    height: 0px;
-    background-color: #a5a5f5;
-  }
-
-  div#goban_body {
-    float: left;
-    width: 500px;
-  }
-
-  div#goban_right {
-    float: right;
-    width: 310px;
-    text-align: left;
-    padding-left: 20px;
-    padding-top: 20px;
-    line-height: 180%;
-  }
-
-  div#goban_board_area {
-    width: 500px;
-    height: 500px;
-  }
-
-  div#operation_button_area {
-    width: 100%;
-    padding-left: 5px;
-    padding-top: 15px;
-    padding-bottom: 15px;
-  }
-
-  div#goban_footer {
-    width: 832px;
-    display: inline-block;
-    border-right:1px solid #258;
-    border-top:1px solid #258;
-    padding-top: 15px;
-    padding-bottom: 15px;
+    width: 600px;
+    border:1px solid black;
   }
 
   img.button {
@@ -65,17 +21,50 @@
     height: 40px;
   }
 
+  div.open_button {
+    background-color: #d1e6fc;
+    font-size: 14pt;
+    padding: 10px;
+    margin: 0;
+    border-bottom: 1px solid #aaa;
+    cursor: pointer;
+  }
+
+  div#play_info {
+    padding-top: 30px;
+    padding-left: 30px;
+    margin-bottom: 30px;
+  };
+
+  div#goban_board {
+    padding-bottom: 30px;
+  }
+
+  div#operation_button_area {
+    width: 100%;
+    padding-left: 5px;
+    padding-top: 15px;
+    padding-bottom: 15px;
+    margin-bottom: 10px;
+  }
+
+  div#tree_area {
+    padding: 0px;
+    margin: 0px;
+  }
+
   div#sgfarea {
-    width: 700px;
-    height: 50px;
+    width: 550px;
+    height: 100px;
     word-wrap: break-word;
+    padding: 20px;
     overflow: auto;
   }
 
-input[type="text"], input[type="number"], textarea, select {
-        outline: none;
-        border: 1px solid #aaa;
-}
+  input[type="text"], input[type="number"], textarea, select {
+    outline: none;
+    border: 1px solid #aaa;
+  }
 
 </style>
 
@@ -158,7 +147,7 @@ input[type="text"], input[type="number"], textarea, select {
     player = new IgoPlayer(tree);
 
     var drawer = createDrawer(player, "goban_canvas", "tree_canvas", option);
-    drawer.resize(500, 500);
+    drawer.resize(600, 600);
 
     option.clickType = ClickType.MOVE;
     player.addListener(function() {
@@ -245,98 +234,98 @@ input[type="text"], input[type="number"], textarea, select {
     if (filename)
       $("#stone_button").attr("src", "/images/" + filename);
   }
+
+  $(function() {
+    $("div.open_button").on('click', function() {
+      $(this).next().slideToggle();
+    }).each(function() {
+     if ($(this).attr("id") != "board_open_button")
+        $(this).next().hide();
+    });
+  });
+
 </script>
 
 
 <div id=contents_area>
 
  <%= link_to '戻る', sec_room_path(@kifu.room) %>
+ <%= form_for(@kifu, html: {onsubmit: "return submit_action();"}) do |f| %>
+   <%= hidden_field_tag :ktok, @kifu.key %>
+   <%= f.hidden_field :sgfdata, id: "sgfdata_field"  %>
+   <div class="actions" style="width: 680px; margin-left: auto;">
+     <%= f.submit %>
+   </div>
+ <% end %>
 
  <div id=goban_area>
 
-  <div id=goban_header>
-  </div>
+    <div class=open_button>対局情報</div>
+    <div id=play_info>
+      <table>
+      <tr>
+      <th>対局日</th>
+      <td><%= date_select :info, :infodate, include_blank: true %></td>
+      </tr>
 
-  <div id=goban_body>
+      <tr>
+      <th>黒番</th>
+      <td><%= text_field_tag :black_player, '', style: "width: 218px;" %></td>
+      </tr>
 
-    <div id=goban_board_area>
-      <canvas id="goban_canvas" width=500px height=500px></canvas>
+      <tr>
+      <th>白番</th>
+      <td><%= text_field_tag :white_player, '', style: "width: 218px;" %></td>
+      </tr>
+
+      <tr>
+      <th>棋力(黒)</th>
+      <td><%= select_tag :black_rank, options_for_select(@rank_list) %></td>
+      </tr>
+
+      <tr>
+      <th>棋力(白)</th>
+      <td><%= select_tag :white_rank, options_for_select(@rank_list) %></td>
+      </tr>
+
+      <tr>
+      <th>コミ</th>
+      <td><%= number_field_tag :komi, 6.5, size: 3, step: 0.5, style: "width: 50px" %></td>
+      </tr>
+
+      <tr>
+      <th>対局結果</th>
+      <td><%= text_field_tag :result, '', style: "width: 218px;" %></td>
+      </tr>
+      </table>
+      <%= text_area_tag :comment, '', size: "33x3" %>
     </div>
 
-    <div id=operation_button_area>
-      <img src="/images/btn_begin.png"    class="button" onclick="player.backToHead();" />
-      <img src="/images/btn_bback.png"    class="button" onclick="player.backN(10);" />
-      <img src="/images/btn_back.png"     class="button" onclick="player.back();" />
-      <img src="/images/btn_forward.png"  class="button" onclick="player.forward();" />
-      <img src="/images/btn_fforward.png" class="button" onclick="player.forwardN(10);" />
-      <img src="/images/btn_end.png"      class="button" onclick="player.forwardToTail();" />
-      <img src="/images/btn_pass.png"     class="button" onclick="player.pass();" />
-      <img src="/images/btn_cut.png"      class="button" onclick="player.cut();" />
-      <img src="/images/number.png"       class="button" onclick="number_button();" />
-      <img src="/images/change.png"       class="button" onclick="move_button();" />
-      <img id="stone_button" class="button" onclick="change_stone_button();" />
+    <div class=open_button id=board_open_button>碁盤</div>
+    <div id=goban_board>
+      <canvas id="goban_canvas" width=600px height=600px></canvas>
+      <div id=operation_button_area>
+        <img src="/images/btn_begin.png"    class="button" onclick="player.backToHead();" />
+        <img src="/images/btn_bback.png"    class="button" onclick="player.backN(10);" />
+        <img src="/images/btn_back.png"     class="button" onclick="player.back();" />
+        <img src="/images/btn_forward.png"  class="button" onclick="player.forward();" />
+        <img src="/images/btn_fforward.png" class="button" onclick="player.forwardN(10);" />
+        <img src="/images/btn_end.png"      class="button" onclick="player.forwardToTail();" />
+        <img src="/images/btn_pass.png"     class="button" onclick="player.pass();" />
+        <img src="/images/btn_cut.png"      class="button" onclick="player.cut();" />
+        <img src="/images/number.png"       class="button" onclick="number_button();" />
+        <img src="/images/change.png"       class="button" onclick="move_button();" />
+        <img id="stone_button" class="button" onclick="change_stone_button();" />
+      </div>
     </div>
 
-  </div>
+    <div class=open_button>木</div>
+    <div id=tree_area><canvas id="tree_canvas" width=600px height=200px></canvas></div>
 
-  <div id=goban_right>
-    <table>
-    <tr>
-    <th>対局日</th>
-    <td><%= date_select :info, :infodate, include_blank: true %></td>
-    </tr>
-
-    <tr>
-    <th>黒番</th>
-    <td><%= text_field_tag :black_player, '', style: "width: 218px;" %></td>
-    </tr>
-
-    <tr>
-    <th>白番</th>
-    <td><%= text_field_tag :white_player, '', style: "width: 218px;" %></td>
-    </tr>
-
-    <tr>
-    <th>棋力(黒)</th>
-    <td><%= select_tag :black_rank, options_for_select(@rank_list) %></td>
-    </tr>
-
-    <tr>
-    <th>棋力(白)</th>
-    <td><%= select_tag :white_rank, options_for_select(@rank_list) %></td>
-    </tr>
-
-    <tr>
-    <th>コミ</th>
-    <td><%= number_field_tag :komi, 6.5, size: 3, step: 0.5, style: "width: 50px" %></td>
-    </tr>
-
-    <tr>
-    <th>対局結果</th>
-    <td><%= text_field_tag :result, '', style: "width: 218px;" %></td>
-    </tr>
-    </table>
-
-    <%= text_area_tag :comment, '', size: "33x3" %>
-    <br />
-    <br />
-    <canvas id="tree_canvas" width=285px height=235px></canvas>
-  </div>
-
-  <div id=goban_footer>
+    <div class=open_button>SGF</div>
     <div id="sgfarea"></div>
-  </div>
 
-  <br />
-  </div>
-
-  <%= form_for(@kifu, html: {onsubmit: "return submit_action();"}) do |f| %>
-    <%= hidden_field_tag :ktok, @kifu.key %>
-    <%= f.hidden_field :sgfdata, id: "sgfdata_field"  %>
-    <div class="actions">
-      <%= f.submit %>
-    </div>
-  <% end %>
+ </div>
 
 </div>
 
