@@ -83,7 +83,7 @@ test:
 #
 production:
   <<: *default
-  database: da6cdplvfii6c
-  username: faniyivuxtcsdy
-  password: AxPNA4DDbhLoj2lihBLyp2ha28
-  host: ec2-54-243-132-114.compute-1.amazonaws.com
+  database: <%= ENV['DB_DATABASE'] %>
+  username: <%= ENV['DB_USERNAME'] %>
+  password: <%= ENV['DB_PASSWORD'] %>
+  host: <%= ENV['DB_HOST'] %>
