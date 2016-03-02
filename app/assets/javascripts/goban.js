@@ -1249,7 +1249,9 @@ var GoDrawerEnv = function(size, ctx) {
 }
 
 var GoDrawer = function(size, ctx) {
-  this.env = new GoDrawerEnv(size, ctx);
+  var offscreen = document.createElement('canvas');
+
+  this.env = new GoDrawerEnv(size, offscreen.getContext('2d'));
   this.handlers = [];
 
   this.addDrawHandler = function(handler) {
@@ -1257,6 +1259,9 @@ var GoDrawer = function(size, ctx) {
   }
 
   this.resize = function(width, height) {
+    offscreen.width  = width;
+    offscreen.height = height;
+
     this.env.resize(width, height);
     this.draw();
   }
@@ -1270,6 +1275,7 @@ var GoDrawer = function(size, ctx) {
         ctx.restore();
       }
     }
+    ctx.drawImage(offscreen, 0, 0);
   }
 }
 
@@ -1496,6 +1502,7 @@ var DefaultGoDrawerFactory = function() {
 
   this.create = function(player, ctx, option) {
     var drawer = new GoDrawer(player.size, ctx);
+    drawer.resize(ctx.canvas.width, ctx.canvas.height);
 
     option.blackStoneImg = createImage(drawer, option.blackStoneImagePath);
     option.whiteStoneImg = createImage(drawer, option.whiteStoneImagePath);
@@ -1767,19 +1774,12 @@ var ClickType = {
   ERASE: 4
 }
 
-var createDrawer = function(player, id1, id2, opt) {
-  var gobanCanvas = document.getElementById(id1);
-  if (!gobanCanvas || !gobanCanvas.getContext)
-    return;
-  var treeCanvas  = document.getElementById(id2);
-  if (!treeCanvas || !treeCanvas.getContext)
-    return;
-
+var createDrawer = function(player, gobanCanvas, treeCanvas, opt) {
   var factory = new DefaultGoDrawerFactory();
-  var drawer = factory.create(player, gobanCanvas.getContext('2d'), opt);
+  var goban_drawer = factory.create(player, gobanCanvas.getContext('2d'), opt);
   var treeDrawer = new TreeDrawer(player, treeCanvas, treeCanvas.getContext('2d'));
   
-  var env = drawer.env;
+  var env = goban_drawer.env;
   var downPos = {};
 
   gobanCanvas.addEventListener("click", function(e) {
@@ -1818,10 +1818,8 @@ var createDrawer = function(player, id1, id2, opt) {
   });
 
   player.addListener(function() {
-    drawer.draw();
+    goban_drawer.draw();
   });
-
-  return drawer;
 }
 
 if (typeof(module) != "undefined") {
