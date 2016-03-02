@@ -141,10 +141,17 @@
       return;
     }
 
+    var gobanCanvas = document.getElementById("goban_canvas");
+    if (!gobanCanvas || !gobanCanvas.getContext)
+      return;
+
+    var treeCanvas  = document.getElementById("tree_canvas");
+    if (!treeCanvas || !treeCanvas.getContext)
+      return;
+
     player = new IgoPlayer(tree);
 
-    var drawer = createDrawer(player, "goban_canvas", "tree_canvas", option);
-    drawer.resize(500, 500);
+    createDrawer(player, gobanCanvas, treeCanvas, option);
 
     option.clickType = ClickType.MOVE;
     player.addListener(function() {
