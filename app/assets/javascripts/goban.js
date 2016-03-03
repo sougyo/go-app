@@ -434,7 +434,7 @@ var SgfPropParser = function() {
     PB: genOneParser(parseSimpleText),
     PC: genOneParser(parseSimpleText),
     PW: genOneParser(parseSimpleText),
-    PE: genOneParser(parseSimpleText),
+    RE: genOneParser(parseSimpleText),
     RO: genOneParser(parseSimpleText),
     RU: genOneParser(parseSimpleText),
     SO: genOneParser(parseSimpleText),
@@ -447,6 +447,9 @@ var SgfPropParser = function() {
     OB: genOneParser(parseNumber),
     OW: genOneParser(parseNumber),
     WL: genOneParser(parseReal),
+
+    KM: genOneParser(parseReal),
+
   };
 }();
 
@@ -517,12 +520,12 @@ var SgfReader = function() {
         blocks.push(block_token.data);
       
       var parser = SgfPropParser[ident];
-      if (parser) {
-        var p = parser(blocks);
-        if (p)
-          node.setProperty(ident, p);
-      } else
-        node.setProperty(ident, blocks);
+      var p = parser ? parser(blocks) : undefined;
+
+      if (p !== undefined)
+        node.setPropertyWithType(ident, p, SgfNodeType.PARSED);
+      else
+        node.setPropertyWithType(ident, blocks, SgfNodeType.PARSE_FAILED);
     }
 
     parentNode.addChild(node);
@@ -613,15 +616,37 @@ var SgfReader = function() {
   }
 }
 
-var SgfNode = function(parentNode) {
-  this.properties = {};
+var SgfNodeType = {
+  NOT_PARSED:   1,
+  PARSED:       2,
+  PARSE_FAILED: 3,
+}
 
+var SgfNode = function(parentNode) {
+  var Elem = function(type, data) {
+    this.type = type;
+    this.data = data;
+
+    this.copy = function() {
+      var data = this.data;
+      var new_data = data.hasOwnProperty("copy") ?
+                       data.copy() :
+                       JSON.parse(JSON.stringify(data));
+      return new Elem(this.type, new_data);
+    }
+  }
+
+  this.properties = {};
   this.parentNode = parentNode;
   this.children = [];
   this.childIndex = 0;
 
   this.setProperty = function(propIdent, propValue) {
-    this.properties[propIdent] = propValue;
+    this.setPropertyWithType(propIdent, propValue, SgfNodeType.NOT_PARSED);
+  }
+
+  this.setPropertyWithType = function(propIdent, propValue, type) {
+    this.properties[propIdent] = new Elem(type, propValue);
   }
 
   this.setProperties = function(props, overwrite) {
@@ -635,7 +660,9 @@ var SgfNode = function(parentNode) {
   }
 
   this.getProperty = function(propIdent) {
-    return this.properties[propIdent];
+    var elem = this.properties[propIdent];
+    if (elem && (elem.type == SgfNodeType.NOT_PARSED || elem.type == SgfNodeType.PARSED))
+      return elem.data;
   }
 
   this.hasProperty = function(propIdent) {
@@ -648,12 +675,8 @@ var SgfNode = function(parentNode) {
 
   this.copy = function(parentNode) {
     var result = new SgfNode(parentNode);
-    for (var ident in this.properties) {
-      var prop = this.properties[ident];
-      result.properties[ident] = prop.hasOwnProperty("copy") ?
-                                   prop.copy() :
-                                   JSON.parse(JSON.stringify(prop));
-    }
+    for (var ident in this.properties)
+      result.properties[ident] = this.properties[ident].copy();
     for (var i = 0; i < this.children.length; i++)
       result.addChild(this.children[i].copy(result));
     result.setChildIndex(this.childIndex);
@@ -711,7 +734,7 @@ var SgfNode = function(parentNode) {
     var result = ";";
     for (ident in this.properties) {
       result += ident;
-      result += propValue2str(this.properties[ident]);
+      result += propValue2str(this.properties[ident].data);
     }
     return result;
   }
