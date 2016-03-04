@@ -367,13 +367,11 @@ var SgfPropParser = function() {
   }
 
   function parseSimpleText(str) {
-    // TODO
-    return str;
+    return str.replace(/\t|\v|\n|\r/g, " ");
   }
 
   function parseText(str) {
-    // TODO
-    return str;
+    return str.replace(/\t|\v/g, " ");
   }
 
   function orParser(parse1, parse2) {
@@ -583,7 +581,7 @@ var SgfReader = function() {
           if (p == -1)
             parseError();
         } while (rest[p - 1] == '\\');
-        var block = nextPos(p + 1).slice(1, -1);
+        var block = nextPos(p + 1).slice(1, -1).replace(/\\\]/g, "]");
         return new Token(BracketBlock, block);
       default:
         var tmp = rest.match(/[^A-Z]/);
@@ -717,6 +715,13 @@ var SgfNode = function(parentNode) {
     this.children[this.childIndex] = child;
   }
 
+  function escapeStr(str) {
+    var result = str.replace(/\]/g, "\\]");
+    if (result.slice(-1) == "\\")
+      result += " ";
+    return result;
+  }
+
   function propValue2str(propValue) {
     if (!propValue)
       return "[]";
@@ -726,7 +731,7 @@ var SgfNode = function(parentNode) {
 
     var result = "";
     for (var i = 0; i < propValue.length; i++)
-      result += "[" + propValue[i].toString().replace(/\]/g, "\\]") + "]";
+      result += "[" + escapeStr(propValue[i].toString()) + "]";
     return result;
   }
 
