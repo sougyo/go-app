@@ -10,21 +10,37 @@
   div#goban_area {
     margin-top: 30px;
     width: 500px;
-    border:1px solid black;
+    border-top: solid 1px #aaccaa;
+    border-left: solid 1px #aaccff;
+    border-right: solid 1px #aaccff;
+    border-bottom: solid 1px #aaccff;
   }
 
   img.button {
-    width: 60px;
-    height: 60px;
+    width: 45px;
+    height: 45px;
     margin: 8px;
   }
 
+  img.large_button {
+    width: 70px;
+    height: 70px;
+    margin-left: 15px;
+    margin-right: 15px;
+    margin-bottom: 10px;
+  }
+
   div.open_button {
-    background-color: #d1e6fc;
+    /* Permalink - use to edit and share this gradient: http://colorzilla.com/gradient-editor/#f6f8f9+0,c7deea+90,3a9cd8+95,e6edf4+100 */
+    background: rgb(246,248,249);
+    background: -moz-linear-gradient(top, rgba(246,248,249,1) 0%, rgba(199,222,234,1) 90%, rgba(38,116,246,1) 95%, rgba(230,237,244,1) 100%);
+    background: -webkit-linear-gradient(top, rgba(246,248,249,1) 0%,rgba(199,222,234,1) 90%,rgba(38,116,246,1) 95%,rgba(230,237,244,1) 100%);
+    background: linear-gradient(to bottom, rgba(246,248,249,1) 0%,rgba(199,222,234,1) 90%,rgba(38,116,246,1) 95%,rgba(230,237,244,1) 100%);
+    filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#f6f8f9', endColorstr='#e6edf4',GradientType=0 ); /* IE6-9 */
+
     font-size: 14pt;
     padding: 10px;
     margin: 0;
-    border-bottom: 1px solid #aaa;
     cursor: pointer;
   }
 
@@ -66,71 +82,165 @@
 </style>
 
 <script>
-  var player = null;
+  var ClickType = {
+    MOVE: 1,
+    BLACK: 2,
+    WHITE: 3,
+    ERASE: 4
+  }
+
+  var createDrawer = function(player, gobanCanvas, treeCanvas, opt) {
+    var factory = new DefaultGoDrawerFactory();
+    var goban_drawer = factory.create(player, gobanCanvas.getContext('2d'), opt);
+    var treeDrawer = new TreeDrawer(player, treeCanvas, treeCanvas.getContext('2d'));
+    
+    var env = goban_drawer.env;
+    var downPos = {};
+
+    gobanCanvas.addEventListener("click", function(e) {
+      e.preventDefault(e);
+      var p = env.mouseEventToIJ(e);
+      var r = e.target.getBoundingClientRect();
+      if (p.i    == downPos.p.i    &&
+          p.j    == downPos.p.j    &&
+          r.left == downPos.r.left &&
+          r.top  == downPos.r.top) {
+        switch (opt.clickType) {
+        case ClickType.BLACK:
+          player.setStone(p.i, p.j, StoneType.BLACK);
+          break;
+        case ClickType.WHITE:
+          player.setStone(p.i, p.j, StoneType.WHITE);
+          break;
+        case ClickType.ERASE:
+          player.setStone(p.i, p.j, StoneType.NONE);
+          break;
+        default:
+          player.putStone(p.i, p.j);
+        }
+      }
+    });
+
+    player.addListener(function() {
+      treeDrawer.resetPosition();
+      treeDrawer.draw();
+    });
+
+    gobanCanvas.addEventListener("mousedown", function(e) {
+      e.preventDefault(e);
+      downPos.p = env.mouseEventToIJ(e);
+      downPos.r = e.target.getBoundingClientRect();
+    });
+
+    player.addListener(function() {
+      goban_drawer.draw();
+    });
+  }
+
   var option = {
-    bgColor:         'rgb(252, 247, 242)',
-    blackStoneColor: "black",
-    whiteStoneColor: "rgb(210, 210, 210)",
+    bgColor:             'rgb(252, 247, 242)',
+    blackStoneColor:     "black",
+    whiteStoneColor:     "rgb(210, 210, 210)",
     blackStoneImagePath: "/images/black.png",
     whiteStoneImagePath: "/images/white.png",
     boardImagePath:      "/images/wood.png",
   };
 
-  var key_prop_pairs = [
-    ['black_player', "PB"],
-    ['white_player', "PW"],
-    ['black_rank', "BR"],
-    ['white_rank', "WR"],
-    ['komi', "KM"],
-    ['result', "RE"]
-  ];
+  var PropField = function() {
+    var key_prop_pairs = [
+      ['black_player', "PB"],
+      ['white_player', "PW"],
+      ['black_rank'  , "BR"],
+      ['white_rank'  , "WR"],
+      ['komi'        , "KM"],
+      ['result'      , "RE"]
+    ];
 
-  function apply_comment(player) {
-    var c = player.sgfTree.current.getProperty("C");
-    $('#comment').val(c ? c : "");
-  }
-
-  function apply_sgf(player) {
-    $('#sgfarea').text(player.sgfTree.toSgf());
-  }
-
-  function apply_props(player) {
-    for (var i = 0; i < key_prop_pairs.length; i++) {
-      var a = key_prop_pairs[i];
-      $('#' + a[0]).val(player.sgfTree.getRoot().getProperty(a[1]));
-    }
-  }
-
-  function apply_date(player) {
-    var dt = player.sgfTree.getRoot().getProperty("DT");
-    if (dt) {
-      var m = dt.match(/(\d\d\d\d)[\-\/](\d\d)[\-\/](\d\d)/);
-
-      if (m && m.length == 4) {
-        $('#info_infodate_1i').val(Number(m[1]));
-        $('#info_infodate_2i').val(Number(m[2]));
-        $('#info_infodate_3i').val(Number(m[3]));
+    this.update_field = function(player) {
+      for (var i = 0; i < key_prop_pairs.length; i++) {
+        var a = key_prop_pairs[i];
+        $('#' + a[0]).val(player.sgfTree.getRoot().getProperty(a[1]));
       }
     }
-  }
 
-  function scroll_down(id) {
-    var obj = document.getElementById(id);
-    if(obj)
-      obj.scrollTop = obj.scrollHeight;
-  }
-
-  function get_date() {
-    var date = undefined;
-    var y = $('#info_infodate_1i').val();
-    var m = $('#info_infodate_2i').val();
-    var d = $('#info_infodate_3i').val();
-    if (y && m && d) {
-      date = y + "-" + ("0" + m).slice(-2) + "-" + ("0" + d).slice(-2);
+    this.update_player = function(player) {
+      for (var i = 0; i < key_prop_pairs.length; i++) {
+        var a = key_prop_pairs[i];
+        var val = $('#' + a[0]).val();
+        if (val !== undefined)
+          player.sgfTree.getRoot().setProperty(a[1], val);
+      }
     }
-    return date;
-  }
+  };
 
+  var DateField = function() {
+    var get_date = function() {
+      var date = undefined;
+      var y = $('#info_infodate_1i').val();
+      var m = $('#info_infodate_2i').val();
+      var d = $('#info_infodate_3i').val();
+      if (y && m && d) {
+        date = y + "-" + ("0" + m).slice(-2) + "-" + ("0" + d).slice(-2);
+      }
+      return date;
+    }
+
+    this.update_field = function(player) {
+      var dt = player.sgfTree.getRoot().getProperty("DT");
+      if (dt) {
+        var m = dt.match(/(\d\d\d\d)[\-\/](\d\d)[\-\/](\d\d)/);
+
+        if (m && m.length == 4) {
+          $('#info_infodate_1i').val(Number(m[1]));
+          $('#info_infodate_2i').val(Number(m[2]));
+          $('#info_infodate_3i').val(Number(m[3]));
+        }
+      }
+    }
+
+    this.update_player = function(player) {
+      player.sgfTree.getRoot().setProperty("DT", get_date());
+    }
+  };
+
+  var CommentField = function() {
+    this.update_field = function(player) {
+      var c = player.sgfTree.current.getProperty("C");
+      $('#comment').val(c ? c : "");
+    }
+
+    this.update_player = function(player) {
+      var c = $('#comment').val();
+      if (c)
+        player.sgfTree.current.setProperty("C", c);
+      else
+        player.sgfTree.current.removeProperty("C");
+      player.notify();
+    }
+  };
+
+  var SgfArea = function() {
+    function scroll_down(id) {
+      var obj = document.getElementById(id);
+      if(obj)
+        obj.scrollTop = obj.scrollHeight;
+    }
+
+    this.update_sgf_area = function(player) {
+      $('#sgfarea').text(player.sgfTree.toSgf());
+      scroll_down('sgfarea');
+    }
+
+    this.submit_action = function(player) {
+      $("#sgfdata_field").val(player.sgfTree.toSgf());
+    }
+  };
+
+  var player = null;
+  var prop_field = new PropField();
+  var date_field = new DateField();
+  var comment_field = new CommentField();
+  var sgf_area = new SgfArea();
   $(document).ready(function() {
     var tree;
 
@@ -156,22 +266,16 @@
     option.clickType = ClickType.MOVE;
     player.addListener(function() {
       apply_stone_button_image();
-      apply_comment(player);
-      apply_sgf(player);
-      scroll_down('sgfarea');
+      comment_field.update_field(player);
+      sgf_area.update_sgf_area(player);
     });
     apply_stone_button_image();
     player.updateGoban();
-    apply_props(player);
-    apply_date(player);
+    prop_field.update_field(player);
+    date_field.update_field(player);
 
     $('#comment').bind('input', function() {
-      var c = $('#comment').val();
-      if (c)
-        tree.current.setProperty("C", c);
-      else
-        tree.current.removeProperty("C");
-      player.notify();
+      comment_field.update_player(player);
     });
   });
 
@@ -189,15 +293,9 @@
     if (!player)
       return;
 
-    for (var i = 0; i < key_prop_pairs.length; i++) {
-      var a = key_prop_pairs[i];
-      var val = $('#' + a[0]).val();
-      if (val !== undefined)
-        player.sgfTree.getRoot().setProperty(a[1], val);
-    }
-    player.sgfTree.getRoot().setProperty("DT", get_date());
-
-    $("#sgfdata_field").val(player.sgfTree.toSgf());
+    prop_field.update_player(player);
+    date_field.update_player(player);
+    sgf_area.submit_action(player);
   }
 
   function change_stone_button() {
@@ -304,16 +402,23 @@
       <%= text_area_tag :comment, '', size: "33x3" %>
     </div>
 
+    <div class=open_button>SGF</div>
+    <div id="sgfarea"></div>
+
+    <div class=open_button>木</div>
+    <div id=tree_area><canvas id="tree_canvas" width=500px height=200px></canvas></div>
+
     <div class=open_button id=board_open_button>碁盤</div>
     <div id=goban_board>
       <canvas id="goban_canvas" width=500px height=500px></canvas>
       <div id=operation_button_area>
         <img src="/images/btn_begin.png"    class="button" onclick="player.backToHead();" />
         <img src="/images/btn_bback.png"    class="button" onclick="player.backN(10);" />
-        <img src="/images/btn_back.png"     class="button" onclick="player.back();" />
-        <img src="/images/btn_forward.png"  class="button" onclick="player.forward();" />
+        <img src="/images/btn_back.png"     class="large_button" onclick="player.back();" />
+        <img src="/images/btn_forward.png"  class="large_button" onclick="player.forward();" />
         <img src="/images/btn_fforward.png" class="button" onclick="player.forwardN(10);" />
         <img src="/images/btn_end.png"      class="button" onclick="player.forwardToTail();" />
+        <br />
         <img src="/images/btn_pass.png"     class="button" onclick="player.pass();" />
         <img src="/images/btn_cut.png"      class="button" onclick="player.cut();" />
         <img src="/images/number.png"       class="button" onclick="number_button();" />
@@ -321,12 +426,6 @@
         <img id="stone_button" class="button" onclick="change_stone_button();" />
       </div>
     </div>
-
-    <div class=open_button>木</div>
-    <div id=tree_area><canvas id="tree_canvas" width=500px height=200px></canvas></div>
-
-    <div class=open_button>SGF</div>
-    <div id="sgfarea"></div>
 
  </div>
 
