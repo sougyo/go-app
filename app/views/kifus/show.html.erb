@@ -89,10 +89,19 @@
     ERASE: 4
   }
 
-  var createDrawer = function(player, gobanCanvas, treeCanvas, opt) {
+  var clickType = ClickType.MOVE;
+  var createDrawer = function(player, opt) {
+    var gobanCanvas = document.getElementById("goban_canvas");
+    if (!gobanCanvas || !gobanCanvas.getContext)
+      return false;
+
+    var treeCanvas  = document.getElementById("tree_canvas");
+    if (!treeCanvas || !treeCanvas.getContext)
+      return false;
+
     var factory = new DefaultGoDrawerFactory();
     var goban_drawer = factory.create(player, gobanCanvas.getContext('2d'), opt);
-    var treeDrawer = new TreeDrawer(player, treeCanvas, treeCanvas.getContext('2d'));
+    var treeDrawer   = new TreeDrawer(player, treeCanvas, treeCanvas.getContext('2d'));
     
     var env = goban_drawer.env;
     var downPos = {};
@@ -105,7 +114,7 @@
           p.j    == downPos.p.j    &&
           r.left == downPos.r.left &&
           r.top  == downPos.r.top) {
-        switch (opt.clickType) {
+        switch (clickType) {
         case ClickType.BLACK:
           player.setStone(p.i, p.j, StoneType.BLACK);
           break;
@@ -135,6 +144,21 @@
     player.addListener(function() {
       goban_drawer.draw();
     });
+
+    return true;
+  }
+
+  var create_player = function() {
+    var tree;
+
+    try {
+      tree = IgoTreeFactory.createBySgf(<%= raw @kifu.sgfdata.to_json %>);
+    } catch(e) {
+      alert(e.message);
+      return;
+    }
+
+    return new IgoPlayer(tree);
   }
 
   var option = {
@@ -236,39 +260,25 @@
     }
   };
 
-  var player = null;
   var prop_field = new PropField();
   var date_field = new DateField();
   var comment_field = new CommentField();
   var sgf_area = new SgfArea();
+  var player = create_player();
   $(document).ready(function() {
-    var tree;
-
-    try {
-      tree = IgoTreeFactory.createBySgf(<%= raw @kifu.sgfdata.to_json %>);
-    } catch(e) {
-      alert(e.message);
-      return;
-    }
-
-    var gobanCanvas = document.getElementById("goban_canvas");
-    if (!gobanCanvas || !gobanCanvas.getContext)
+    if (!player)
       return;
 
-    var treeCanvas  = document.getElementById("tree_canvas");
-    if (!treeCanvas || !treeCanvas.getContext)
+    var ret = createDrawer(player, option);
+    if (!ret)
       return;
 
-    player = new IgoPlayer(tree);
-
-    createDrawer(player, gobanCanvas, treeCanvas, option);
-
-    option.clickType = ClickType.MOVE;
     player.addListener(function() {
       apply_stone_button_image();
       comment_field.update_field(player);
       sgf_area.update_sgf_area(player);
     });
+
     apply_stone_button_image();
     player.updateGoban();
     prop_field.update_field(player);
@@ -285,7 +295,7 @@
   }
 
   function move_button() {
-    option.clickType = ClickType.MOVE;
+    clickType = ClickType.MOVE;
     player.changeStone();
   }
 
@@ -299,26 +309,26 @@
   }
 
   function change_stone_button() {
-    switch (option.clickType) {
+    switch (clickType) {
     case ClickType.MOVE:
-      option.clickType = ClickType.BLACK;
+      clickType = ClickType.BLACK;
       break;
     case ClickType.BLACK:
-      option.clickType = ClickType.WHITE;
+      clickType = ClickType.WHITE;
       break;
     case ClickType.WHITE:
-      option.clickType = ClickType.ERASE;
+      clickType = ClickType.ERASE;
       break;
     case ClickType.ERASE:
     default:
-      option.clickType = ClickType.MOVE;
+      clickType = ClickType.MOVE;
     }
     apply_stone_button_image();
   }
 
   function apply_stone_button_image() {
     var filename = null;
-    switch (option.clickType) {
+    switch (clickType) {
     case ClickType.MOVE:
       filename = player.rule.getNextStone() == StoneType.BLACK ? "b.png" : "w.png";
       break;
@@ -334,7 +344,7 @@
     }
 
     if (filename)
-      $("#stone_button").attr("src", "/images/" + filename);
+      document.getElementById("stone_button").src = "/images/" + filename;
   }
 
   $(function() {
