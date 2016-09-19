@@ -82,14 +82,76 @@
 </style>
 
 <script>
-  var ClickType = {
-    MOVE: 1,
-    BLACK: 2,
-    WHITE: 3,
-    ERASE: 4
+  var ClickEventUtil = function() {
+    var ClickConst = {
+      MOVE:  1,
+      BLACK: 2,
+      WHITE: 3,
+      ERASE: 4
+    }
+
+    var clickType = ClickConst.MOVE;
+
+    this.set_move_type = function() {
+      clickType = ClickConst.MOVE;
+    }
+
+    this.set_or_put_stone = function(player, i, j) {
+      switch (clickType) {
+      case ClickConst.BLACK:
+        player.setStone(i, j, StoneType.BLACK);
+        break;
+      case ClickConst.WHITE:
+        player.setStone(i, j, StoneType.WHITE);
+        break;
+      case ClickConst.ERASE:
+        player.setStone(i, j, StoneType.NONE);
+        break;
+      default:
+        player.putStone(i, j);
+      }
+    }
+
+    this.handle_change_operation= function() {
+      switch (clickType) {
+      case ClickConst.MOVE:
+        clickType = ClickConst.BLACK;
+        break;
+      case ClickConst.BLACK:
+        clickType = ClickConst.WHITE;
+        break;
+      case ClickConst.WHITE:
+        clickType = ClickConst.ERASE;
+        break;
+      case ClickConst.ERASE:
+      default:
+        clickType = ClickConst.MOVE;
+      }
+    }
+
+    this.get_operation_img_filename = function() {
+      var filename = null;
+      switch (clickType) {
+      case ClickConst.MOVE:
+        filename = player.rule.getNextStone() == StoneType.BLACK ? "b.png" : "w.png";
+        break;
+      case ClickConst.BLACK:
+        filename = "ab.png";
+        break;
+      case ClickConst.WHITE:
+        filename = "aw.png";
+        break;
+      case ClickConst.ERASE:
+        filename = "ae.png";
+        break;
+      }
+
+      return filename;
+    }
   }
 
-  var clickType = ClickType.MOVE;
+  var click_event_util = new ClickEventUtil();
+
   var createDrawer = function(player, opt) {
     var gobanCanvas = document.getElementById("goban_canvas");
     if (!gobanCanvas || !gobanCanvas.getContext)
@@ -114,19 +176,7 @@
           p.j    == downPos.p.j    &&
           r.left == downPos.r.left &&
           r.top  == downPos.r.top) {
-        switch (clickType) {
-        case ClickType.BLACK:
-          player.setStone(p.i, p.j, StoneType.BLACK);
-          break;
-        case ClickType.WHITE:
-          player.setStone(p.i, p.j, StoneType.WHITE);
-          break;
-        case ClickType.ERASE:
-          player.setStone(p.i, p.j, StoneType.NONE);
-          break;
-        default:
-          player.putStone(p.i, p.j);
-        }
+        click_event_util.set_or_put_stone(player, p.i, p.j);
       }
     });
 
@@ -149,26 +199,14 @@
   }
 
   var create_player = function() {
-    var tree;
-
     try {
-      tree = IgoTreeFactory.createBySgf(<%= raw @kifu.sgfdata.to_json %>);
+      var tree = IgoTreeFactory.createBySgf(<%= raw @kifu.sgfdata.to_json %>);
+      return new IgoPlayer(tree);
     } catch(e) {
       alert(e.message);
       return;
     }
-
-    return new IgoPlayer(tree);
   }
-
-  var option = {
-    bgColor:             'rgb(252, 247, 242)',
-    blackStoneColor:     "black",
-    whiteStoneColor:     "rgb(210, 210, 210)",
-    blackStoneImagePath: "/images/black.png",
-    whiteStoneImagePath: "/images/white.png",
-    boardImagePath:      "/images/wood.png",
-  };
 
   var PropField = function() {
     var key_prop_pairs = [
@@ -254,18 +292,54 @@
       $('#sgfarea').text(player.sgfTree.toSgf());
       scroll_down('sgfarea');
     }
-
-    this.submit_action = function(player) {
-      $("#sgfdata_field").val(player.sgfTree.toSgf());
-    }
   };
+
+  var player = create_player();
+  var option = {
+    bgColor:             'rgb(252, 247, 242)',
+    blackStoneColor:     "black",
+    whiteStoneColor:     "rgb(210, 210, 210)",
+    blackStoneImagePath: "/images/black.png",
+    whiteStoneImagePath: "/images/white.png",
+    boardImagePath:      "/images/wood.png",
+  };
+
+  function number_button() {
+    option.stoneNumber = !option.stoneNumber;
+    player.notify();
+  }
+
+  function move_button() {
+    click_event_util.set_move_type();
+    player.changeStone();
+  }
+
+  function change_stone_button() {
+    click_event_util.handle_change_operation();
+    apply_stone_button_image();
+  }
+
+  function apply_stone_button_image() {
+    var filename = click_event_util.get_operation_img_filename();
+    if (filename)
+      document.getElementById("stone_button").src = "/images/" + filename;
+  }
 
   var prop_field = new PropField();
   var date_field = new DateField();
   var comment_field = new CommentField();
   var sgf_area = new SgfArea();
-  var player = create_player();
-  $(document).ready(function() {
+
+  function submit_action() {
+    if (!player)
+      return;
+
+    prop_field.update_player(player);
+    date_field.update_player(player);
+    $("#sgfdata_field").val(player.sgfTree.toSgf());
+  }
+
+  $(function() {
     if (!player)
       return;
 
@@ -288,64 +362,6 @@
       comment_field.update_player(player);
     });
   });
-
-  function number_button() {
-    option.stoneNumber = !option.stoneNumber;
-    player.notify();
-  }
-
-  function move_button() {
-    clickType = ClickType.MOVE;
-    player.changeStone();
-  }
-
-  function submit_action() {
-    if (!player)
-      return;
-
-    prop_field.update_player(player);
-    date_field.update_player(player);
-    sgf_area.submit_action(player);
-  }
-
-  function change_stone_button() {
-    switch (clickType) {
-    case ClickType.MOVE:
-      clickType = ClickType.BLACK;
-      break;
-    case ClickType.BLACK:
-      clickType = ClickType.WHITE;
-      break;
-    case ClickType.WHITE:
-      clickType = ClickType.ERASE;
-      break;
-    case ClickType.ERASE:
-    default:
-      clickType = ClickType.MOVE;
-    }
-    apply_stone_button_image();
-  }
-
-  function apply_stone_button_image() {
-    var filename = null;
-    switch (clickType) {
-    case ClickType.MOVE:
-      filename = player.rule.getNextStone() == StoneType.BLACK ? "b.png" : "w.png";
-      break;
-    case ClickType.BLACK:
-      filename = "ab.png";
-      break;
-    case ClickType.WHITE:
-      filename = "aw.png";
-      break;
-    case ClickType.ERASE:
-      filename = "ae.png";
-      break;
-    }
-
-    if (filename)
-      document.getElementById("stone_button").src = "/images/" + filename;
-  }
 
   $(function() {
     $("div.open_button").on('click', function() {
