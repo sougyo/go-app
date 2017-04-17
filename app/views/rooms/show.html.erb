@@ -67,7 +67,7 @@ table tr:nth-child(2n+1) {
   </thead>
 
   <tbody>
-    <% @room.kifus.each do |kifu| %>
+    <% @room.kifus.sort_by { |kifu| kifu.updated_at.to_i }.each do |kifu| %>
       <% kifu.sgfdata =~ /DT\[.*(\d\d\d\d)[-\/](\d\d)[-\/](\d\d).*\]/; dt = ($1 && $2 && $3) ? "#{$1}/#{$2}/#{$3}" : "" %>
       <% kifu.sgfdata =~ /PB\[([^\]]*)\]/; pb = $1.to_s %>
       <% kifu.sgfdata =~ /PW\[([^\]]*)\]/; pw = $1.to_s %>
