@@ -14,6 +14,7 @@ class KifusController < ApplicationController
   # GET /kifus/1.json
   def show
     @rank_list = [
+      ["プロ九段", "9p"],
       ["九段", "9d"],
       ["八段", "8d"],
       ["七段", "7d"],
@@ -41,6 +42,7 @@ class KifusController < ApplicationController
       ["逆コミ7目半", "-7.5"]
     ]
     @viewport = 560
+
   end
 
   # GET /kifus/new
@@ -77,12 +79,11 @@ class KifusController < ApplicationController
     }
     sgfdata.encode!("UTF-8", code_name[Kconv.guess(sgfdata)], invalid: :replace, undef: :replace, replace: "?")
 
-    @kifu = Kifu.new(title: title, room_id: room_id, key: SecureRandom.urlsafe_base64(64))
-    #if not sgf?(sgfdata)
-    #  redirect_to view_context.sec_room_path(@kifu.room)
-    #  return
-    #end
-    @kifu.sgfdata = sgfdata
+    @kifu = Kifu.new(title: title, room_id: room_id, key: SecureRandom.urlsafe_base64(64), sgfdata: sgfdata)
+
+    #node = @kifu.sgf_node
+    facade = @kifu.sgf_node_facade
+    #puts node.select("B").to_s
 
     respond_to do |format|
       if @kifu.save
@@ -98,6 +99,12 @@ class KifusController < ApplicationController
   # PATCH/PUT /kifus/1
   # PATCH/PUT /kifus/1.json
   def update
+    facade = @kifu.sgf_node_facade
+    puts "UPDATE=========================="
+    puts facade.player_black
+    puts facade.player_white
+    puts facade.date
+
     respond_to do |format|
       if @kifu.update(kifu_params)
         format.html { redirect_to view_context.sec_kifu_path(@kifu), notice: 'Kifu was successfully updated.' }
@@ -138,53 +145,4 @@ class KifusController < ApplicationController
       raise "Access Denied" unless kifu && key && kifu.key && kifu.key.length == key.length && kifu.key == key
     end
 
-    def sgf?(sgfdata)
-      v = SgfValidator.new
-      v.sgf?(sgfdata)
-    end
-
-    class SgfValidator
-      def initialize
-      end
-
-      def sgf?(sgfdata)
-        begin
-          start_parse(sgfdata)
-        rescue => e
-          return false
-        end
-        return true
-      end
-
-      def start_parse(str)
-        @rest = str.gsub(/\s+\z/, "")
-        read_collection(rest)
-      end
-
-      def read_collection
-        while read_game_tree
-        end
-      end
-
-      def read_game_tree
-        return if @rest[0] != "("
-        n = read_nodes
-
-        raise "error" if !n
-
-        read_collection
-        consume(")")
-      end
-
-      def read_nodes
-      end
-
-      def consume(s)
-        if @rest.start_with?(s)
-          @rest = @rest[s.length .. -1]
-          return
-        end
-        raise "error"
-      end
-    end
 end

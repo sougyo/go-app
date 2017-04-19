@@ -67,14 +67,12 @@ table tr:nth-child(2n+1) {
   </thead>
 
   <tbody>
-    <% @room.kifus.sort_by { |kifu| kifu.updated_at.to_i }.each do |kifu| %>
-      <% kifu.sgfdata =~ /DT\[.*(\d\d\d\d)[-\/](\d\d)[-\/](\d\d).*\]/; dt = ($1 && $2 && $3) ? "#{$1}/#{$2}/#{$3}" : "" %>
-      <% kifu.sgfdata =~ /PB\[([^\]]*)\]/; pb = $1.to_s %>
-      <% kifu.sgfdata =~ /PW\[([^\]]*)\]/; pw = $1.to_s %>
+    <% @data.each do |h| %>
+      <% kifu = h[:kifu] %>
       <tr>
-        <td><%= dt %></td>
-        <td><%= pb %></td>
-        <td><%= pw %></td>
+        <td><%= h[:dt] %></td>
+        <td><%= h[:pb] %></td>
+        <td><%= h[:pw] %></td>
         <td><%= link_to '表示', sec_kifu_path(kifu) %></td>
         <td><%= link_to '削除', sec_kifu_path(kifu), method: :delete, data: { confirm: 'Are you sure?' } %></td>
       </tr>
