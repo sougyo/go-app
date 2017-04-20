@@ -1,4 +1,5 @@
 require 'kconv'
+require 'sgf_reader.rb'
 
 class KifusController < ApplicationController
   before_action :set_kifu, only: [:show, :edit, :update, :destroy]
