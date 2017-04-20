@@ -434,7 +434,7 @@
     <div class=open_button>木</div>
     <div id=tree_area><canvas id="tree_canvas" width=500px height=200px></canvas></div>
 
-    <div class=open_button id=board_open_button>碁盤</div>
+    <div class=open_button id=board_open_button>碁盤<p style="font-size: 70%; display: inline;"> <%= @kifu.sgf_node_facade.title %></p></div>
     <div id=goban_board>
       <canvas id="goban_canvas" width=500px height=500px></canvas>
       <div id=operation_button_area>

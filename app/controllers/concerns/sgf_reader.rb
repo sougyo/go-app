@@ -250,6 +250,23 @@ class SgfNodeFacade
     helper("PW")
   end
 
+  def title
+    h = {}
+    %w( PB BR PW WR RE ).each do |ident|
+      h[ident.to_sym] = helper(ident)
+    end
+
+    return "" if h[:PB].blank? || h[:PW].blank?
+ 
+    [[:PB, :BR], [:PW, :WR]].each do |player, rank|
+      x = h[rank]
+      h[player] += "(#{x})" unless x.blank?
+    end
+
+    h[:RE] = "[#{h[:RE]}]" unless h[:RE].blank?
+    "(#{h[:PB]} vs #{h[:PW]} #{h[:RE]})"
+  end
+
   def date
     dt = helper("DT")
 

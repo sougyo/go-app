@@ -43,7 +43,6 @@ class KifusController < ApplicationController
       ["逆コミ7目半", "-7.5"]
     ]
     @viewport = 560
-
   end
 
   # GET /kifus/new
