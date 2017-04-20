@@ -13,13 +13,13 @@ class RoomsController < ApplicationController
   # GET /rooms/1
   # GET /rooms/1.json
   def show
-    @data = @room.kifus.sort_by { |kifu| kifu.updated_at.to_i }.map do |kifu|
+    @data = @room.kifus.sort_by { |kifu| kifu.created_at.to_i }.map do |kifu|
       x = { kifu: kifu }
       begin
         facade = kifu.sgf_node_facade
-        x[:pb] = facade && facade.player_black
-        x[:pw] = facade && facade.player_white
-        x[:dt] = facade && facade.date
+        x[:pb] = facade && "#{facade.player_black}."
+        x[:pw] = facade && "#{facade.player_white}."
+        x[:dt] = facade && "#{facade.date}."
       rescue => e
         raise e
       end

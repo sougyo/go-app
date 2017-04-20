@@ -81,9 +81,10 @@ class KifusController < ApplicationController
 
     @kifu = Kifu.new(title: title, room_id: room_id, key: SecureRandom.urlsafe_base64(64), sgfdata: sgfdata)
 
-    #node = @kifu.sgf_node
     facade = @kifu.sgf_node_facade
-    #puts node.select("B").to_s
+    @kifu.player_black = facade.player_black
+    @kifu.player_white = facade.player_white
+    @kifu.play_date    = facade.date
 
     respond_to do |format|
       if @kifu.save
@@ -100,10 +101,9 @@ class KifusController < ApplicationController
   # PATCH/PUT /kifus/1.json
   def update
     facade = @kifu.sgf_node_facade
-    puts "UPDATE=========================="
-    puts facade.player_black
-    puts facade.player_white
-    puts facade.date
+    @kifu.player_black = facade.player_black
+    @kifu.player_white = facade.player_white
+    @kifu.play_date    = facade.date
 
     respond_to do |format|
       if @kifu.update(kifu_params)

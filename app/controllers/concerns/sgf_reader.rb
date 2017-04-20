@@ -236,6 +236,7 @@ class SgfReader
   end
 end
 
+require 'date'
 class SgfNodeFacade
   def initialize(root)
     @node = root
@@ -253,9 +254,9 @@ class SgfNodeFacade
     dt = helper("DT")
 
     if dt && dt =~ /(\d\d\d\d)\\?[-\/:](\d\d)\\?[-\/:](\d\d)/
-      "#{$1}/#{$2}/#{$3}"
+      Date.parse("#{$1}/#{$2}/#{$3}")
     else
-      dt
+      nil
     end
   end
 
