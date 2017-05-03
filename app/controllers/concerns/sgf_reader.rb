@@ -95,8 +95,8 @@ end
 
 class SgfParseError < StandardError
   attr_reader :pos
-  def initialize(pos, rest)
-    super("SGF Parse error at: #{pos} : >#{rest[0, 10]}...")
+  def initialize(pos, rest, reason)
+    super("SGF Parse error at #{pos} : #{reason} : >#{rest[0, 10]}...")
     @pos = pos
   end
 end
@@ -122,6 +122,8 @@ class SgfReader
     @pos   = 0
     @cache = nil
 
+    parse_error("empty data") if @rest.strip.blank?
+
     skip_spaces
     read_collection(SgfNode.new(nil))
   end
@@ -135,7 +137,7 @@ class SgfReader
     return if not read_token_by_type(LeftParenthes)
 
     nodes = read_node_sequence(parent_node)
-    parse_error if nodes.empty?
+    parse_error("empty nodes") if nodes.empty?
 
     read_collection(nodes[-1])
 
@@ -182,7 +184,7 @@ class SgfReader
 
   def consume_token(type)
     token = next_token
-    parse_error if token.type != type
+    parse_error("unexpected token") if token.type != type
   end
 
   def cache_token(token)
@@ -215,7 +217,7 @@ class SgfReader
       p = 0
       loop do
         p = @rest.index("]", p + 1)
-        parse_error if p.nil?
+        parse_error("no right bracket") if p.nil?
         break if @rest[p - 1] != '\\' 
       end
       block = next_pos(p + 1)[1...-1].gsub(/\\\]/, "]")
@@ -223,7 +225,7 @@ class SgfReader
       Token.new(BracketBlock, block)
     else
       i = @rest.index(/[^A-Z]/)
-      parse_error if i.nil? || i == 0
+      parse_error("no ident") if i.nil? || i == 0
 
       ident = next_pos(i)
       Token.new(UcWord, ident)
@@ -239,8 +241,8 @@ class SgfReader
     return @rest.slice!(0, n)
   end
 
-  def parse_error
-    raise SgfParseError.new(@pos, @rest)
+  def parse_error(reason)
+    raise SgfParseError.new(@pos, @rest, reason)
   end
 end
 
@@ -251,17 +253,17 @@ class SgfNodeFacade
   end
 
   def player_black
-    helper("PB")
+    get_helper("PB")
   end
 
   def player_white
-    helper("PW")
+    get_helper("PW")
   end
 
   def title
     h = {}
     %w( PB BR PW WR RE ).each do |ident|
-      h[ident.to_sym] = helper(ident)
+      h[ident.to_sym] = get_helper(ident)
     end
 
     return "" if h[:PB].blank? || h[:PW].blank?
@@ -276,7 +278,7 @@ class SgfNodeFacade
   end
 
   def date
-    dt = helper("DT")
+    dt = get_helper("DT")
 
     if dt && dt =~ /(\d\d\d\d)\\?[-\/:](\d\d)\\?[-\/:](\d\d)/
       Date.parse("#{$1}/#{$2}/#{$3}")
@@ -285,7 +287,17 @@ class SgfNodeFacade
     end
   end
 
-  def helper(ident)
+  def get_helper(ident)
     (c = @node.children[0]) && (x = c.get(ident)) && x[0]
+  end
+
+  def set_helper(ident, val)
+    if (c = @node.children[0])
+      c.set(ident, [val]) if not get_helper(ident)
+    end
+  end
+
+  def to_sgf
+    @node.to_sgf
   end
 end

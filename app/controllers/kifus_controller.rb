@@ -70,19 +70,16 @@ class KifusController < ApplicationController
 
     raise "Access Denied" unless room && room_key && room.key == room_key
 
-    sgfdata = params[:sgffile] ? params[:sgffile].read :
-                CGI.unescapeHTML(params[:sgfdata])
+    sgfdata = ""
+    sgfdata = params[:sgffile].read              if params[:sgffile]
+    sgfdata = CGI.unescapeHTML(params[:sgfdata]) if params[:sgfdata]
+
     code_name = {
         Kconv::EUC  => Encoding::EUC_JP,
         Kconv::SJIS => Encoding::Shift_JIS,
         Kconv::UTF8 => Encoding::UTF_8
     }
     sgfdata.encode!("UTF-8", code_name[Kconv.guess(sgfdata)], invalid: :replace, undef: :replace, replace: "?")
-
-    if sgfdata =~ /\A\s*\z/
-      redirect_to controller: :rooms, action: :show, id: room_id, rtok: room_key, error_message: "empty data"
-      return
-    end
 
     node = nil
     begin
@@ -93,9 +90,12 @@ class KifusController < ApplicationController
       return
     end
 
-    @kifu = Kifu.new(title: title, room_id: room_id, key: SecureRandom.urlsafe_base64(64), sgfdata: node.to_sgf)
+    facade = SgfNodeFacade.new(node)
+    facade.set_helper("GM", "1")
+    facade.set_helper("FF", "4")
+    facade.set_helper("SZ", "19")
 
-    facade = @kifu.sgf_node_facade
+    @kifu = Kifu.new(title: title, room_id: room_id, key: SecureRandom.urlsafe_base64(64), sgfdata: facade.to_sgf)
     @kifu.player_black = facade.player_black
     @kifu.player_white = facade.player_white
     @kifu.play_date    = facade.date
