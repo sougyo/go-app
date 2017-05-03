@@ -79,7 +79,21 @@ class KifusController < ApplicationController
     }
     sgfdata.encode!("UTF-8", code_name[Kconv.guess(sgfdata)], invalid: :replace, undef: :replace, replace: "?")
 
-    @kifu = Kifu.new(title: title, room_id: room_id, key: SecureRandom.urlsafe_base64(64), sgfdata: sgfdata)
+    if sgfdata =~ /\A\s*\z/
+      redirect_to controller: :rooms, action: :show, id: room_id, rtok: room_key, error_message: "empty data"
+      return
+    end
+
+    node = nil
+    begin
+      node = SgfReader.new.read_sgf(sgfdata)
+    rescue SgfParseError => e
+      session[:sgfdata] = sgfdata
+      redirect_to controller: :rooms, action: :show, id: room_id, rtok: room_key, error_message: e.message
+      return
+    end
+
+    @kifu = Kifu.new(title: title, room_id: room_id, key: SecureRandom.urlsafe_base64(64), sgfdata: node.to_sgf)
 
     facade = @kifu.sgf_node_facade
     @kifu.player_black = facade.player_black

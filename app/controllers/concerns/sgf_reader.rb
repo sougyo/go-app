@@ -93,6 +93,13 @@ class SgfNode
 
 end
 
+class SgfParseError < StandardError
+  attr_reader :pos
+  def initialize(pos, rest)
+    super("SGF Parse error at: #{pos} : >#{rest[0, 10]}...")
+    @pos = pos
+  end
+end
 
 class SgfReader
   EOF            = 0
@@ -111,10 +118,11 @@ class SgfReader
   end
 
   def read_sgf(str)
-    @rest  = str.strip
+    @rest  = str.rstrip
     @pos   = 0
     @cache = nil
 
+    skip_spaces
     read_collection(SgfNode.new(nil))
   end
 
@@ -174,11 +182,11 @@ class SgfReader
 
   def consume_token(type)
     token = next_token
-    raise if token.type != type
+    parse_error if token.type != type
   end
 
   def cache_token(token)
-    raise if @cache
+    raise "internal error" if @cache
     @cache = token
   end
 
@@ -232,7 +240,7 @@ class SgfReader
   end
 
   def parse_error
-    raise "parse"
+    raise SgfParseError.new(@pos, @rest)
   end
 end
 
@@ -264,7 +272,7 @@ class SgfNodeFacade
     end
 
     h[:RE] = "[#{h[:RE]}]" unless h[:RE].blank?
-    "(#{h[:PB]} vs #{h[:PW]} #{h[:RE]})"
+    "#{h[:PB]} vs #{h[:PW]} #{h[:RE]}"
   end
 
   def date
